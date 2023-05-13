@@ -1,6 +1,6 @@
 /*** CONTROLLER*/
-import prisma from "../lib/prisma";
-import { GetCompanyIdByUser } from "../lib/utils";
+import prisma from "../lib/prisma.js";
+import { GetCompanyIdByUser } from "../lib/utils.js";
 export const get = async (req, res) =>
 {
 

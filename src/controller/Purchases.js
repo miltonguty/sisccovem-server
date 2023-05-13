@@ -1,14 +1,12 @@
 /*** CONTROLLER*/
-import prisma from "../lib/prisma";
-import { GetCompanyIdByUser, GetCurrentUserId } from "../lib/utils";
-export const get = async (req, res) =>
-{
+import prisma from "../lib/prisma.js";
+import { GetCompanyIdByUser, GetCurrentUserId } from "../lib/utils.js";
+export const get = async (req, res) => {
 
   const { filter } = req.query;
   let filterObject = {}
 
-  if (filter)
-  {
+  if (filter) {
     filterObject = {
       where: {
         purId: {
@@ -29,13 +27,11 @@ export const get = async (req, res) =>
   return result;
 
 };
-export const getById = async (req, res) =>
-{
+export const getById = async (req, res) => {
 
   const { purId } = req.query;
   let result = null
-  if (purId)
-  {
+  if (purId) {
     const Purchase = await prisma.purchases.findFirst({
       where: { purId: purId },
     });
@@ -49,8 +45,7 @@ export const getById = async (req, res) =>
   return result;
 
 };
-export const add = async (req, res) =>
-{
+export const add = async (req, res) => {
 
   const userId = GetCurrentUserId()
   const ComId = GetCompanyIdByUser(userId)
@@ -68,8 +63,7 @@ export const add = async (req, res) =>
   return Purchase;
 
 };
-export const update = async (req, res) =>
-{
+export const update = async (req, res) => {
   const { id, ComId } = req.body;
   const PurchaseUpdate = await prisma.purchases.update({
     where: { purId: id },
@@ -78,8 +72,7 @@ export const update = async (req, res) =>
   return PurchaseUpdate
 
 };
-export const remove = async (req, res) =>
-{
+export const remove = async (req, res) => {
   const { purId } = req.query;
   const PurchaseDelete = await prisma.purchases.update({
     where: { purId: purId },

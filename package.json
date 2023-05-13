@@ -1,0 +1,30 @@
+{
+  "name": "sisccovem-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/app.js"
+  },
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/miltonguty/sisccovem-server.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/miltonguty/sisccovem-server/issues"
+  },
+  "homepage": "https://github.com/miltonguty/sisccovem-server#readme",
+  "devDependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "handlebars": "^4.7.7",
+    "html-pdf": "^3.0.1",
+    "prisma": "^4.14.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^4.14.0"
+  }
+}

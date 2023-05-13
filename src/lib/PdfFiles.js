@@ -1,9 +1,8 @@
-import pdf from './html-to-pdf'
+import pdf from './html-to-pdf.js'
 import fs from 'fs';
-const path = require("path");
-import { BASE_URL } from '../../config';
-const createPdf = async (nameTemplate, nameOutput, datas) =>
-{
+import path from "path"
+//import { BASE_URL } from '../../config.';
+const createPdf = async (nameTemplate, nameOutput, datas) => {
     console.log(path.resolve(__dirname))
     console.log(__filename)
     pdf.registerPartial('Header', '<header> este es el header</header>');

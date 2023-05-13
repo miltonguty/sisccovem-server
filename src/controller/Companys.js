@@ -1,13 +1,11 @@
 /*** CONTROLLER*/
-import prisma from "../lib/prisma";
-export const get = async (req, res) =>
-{
+import prisma from "../lib/prisma.js";
+export const get = async (req, res) => {
 
   const { filter } = req.query;
   let filterObject = {}
 
-  if (filter)
-  {
+  if (filter) {
     filterObject = {
       where: {
         comName: {
@@ -28,14 +26,11 @@ export const get = async (req, res) =>
   return result;
 
 };
-export const getById = async (req, res) =>
-{
-  try
-  {
+export const getById = async (req, res) => {
+  try {
     const { comId } = req.query;
 
-    if (comId)
-    {
+    if (comId) {
       const company = await prisma.companys.findFirst({
         where: { comId: comId },
       });
@@ -47,17 +42,14 @@ export const getById = async (req, res) =>
       }
       res.status(200).json(result);
 
-    } else
-    {
+    } else {
       res.status(404).json({ error: "company id not provide" });
     }
-  } catch (err)
-  {
+  } catch (err) {
     res.status(404).json({ error: err });
   }
 };
-export const add = async (req, res) =>
-{
+export const add = async (req, res) => {
 
   const { name, phone, address } = req.body;
   const company = await prisma.companys.create({
@@ -66,32 +58,26 @@ export const add = async (req, res) =>
   return company;
 
 };
-export const update = async (req, res) =>
-{
-  try
-  {
+export const update = async (req, res) => {
+  try {
     const { id, name, phone, address } = req.body;
     const companyUpdate = await prisma.companys.update({
       where: { comId: id },
       data: { comName: name, comPhone: phone, comAddress: address },
     });
     res.status(200).json(companyUpdate);
-  } catch (err)
-  {
+  } catch (err) {
     res.status(404).json({ error: err });
   }
 };
-export const remove = async (req, res) =>
-{
-  try
-  {
+export const remove = async (req, res) => {
+  try {
     const { comId } = req.query;
     const companyDelete = await prisma.companys.delete({
       where: { comId: comId },
     });
     res.status(200).json(companyDelete);
-  } catch (err)
-  {
+  } catch (err) {
     res.status(404).json({ error: err });
   }
 };

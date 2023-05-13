@@ -1,7 +1,7 @@
 /*** CONTROLLER*/
-import createPdf from "../lib/PdfFiles";
-import prisma from "../lib/prisma";
-import { GetCompanyIdByUser, GetCurrentUserId } from "../lib/utils";
+import createPdf from "../lib/PdfFiles.js";
+import prisma from "../lib/prisma.js";
+import { GetCompanyIdByUser, GetCurrentUserId } from "../lib/utils.js";
 export const NOTE_SALES_CLOSE = true;
 export const NOTE_SALES_OPEN = false;
 const GetCurrentNoteSalesByUser = async () => {
