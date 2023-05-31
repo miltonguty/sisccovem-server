@@ -1,20 +1,12 @@
 /*** CONTROLLER*/
-import prisma from "../lib/prisma";
-export const get = async (req, res) => {
-
-  const { filter } = req.query;
+import prisma from "../lib/prisma.js";
+export const get = async (filter) => {
   let filterObject = {}
-
   if (filter) {
     filterObject = {
-      where: {
-        useName: {
-          contains: filter,
-        },
-      }
+      where: filter
     }
-  };
-
+  }
   const users = await prisma.users.findMany(filterObject);
   const result = users.map(item =>
   ({
@@ -26,8 +18,8 @@ export const get = async (req, res) => {
   return result;
 
 };
-export const getById = async (req, res) => {
-  const { useId } = req.query;
+export const getById = async (useId) => {
+
   const comId = GetCompanyIdByUser()
   let result = null
   if (useId) {
@@ -43,18 +35,18 @@ export const getById = async (req, res) => {
   }
   return result;
 };
-export const add = async (req, res) => {
+export const add = async ({ name, email, comId }) => {
 
-  const { name, email, comId } = req.body;
+  //const { name, email, comId } = req.body;
   const user = await prisma.users.create({
     data: { useName: name, useEmail: email, useComId: comId },
   });
   return user;
 
 };
-export const update = async (req, res) => {
+export const update = async ({ id, name, email, comId }) => {
 
-  const { id, name, email, comId } = req.body;
+  //const { id, name, email, comId } = req.body;
   const userUpdate = await prisma.users.update({
     where: { useId: id },
     data: { useName: name, useEmail: email, useComId: comId },
@@ -62,8 +54,8 @@ export const update = async (req, res) => {
   return userUpdate;
 
 };
-export const remove = async (req, res) => {
-  const { useId } = req.query;
+export const remove = async (useId) => {
+  //const { useId } = req.query;
   const userDelete = await prisma.users.delete({
     where: { useId: useId },
   });

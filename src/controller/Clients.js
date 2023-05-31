@@ -1,97 +1,96 @@
 /*** CONTROLLER*/
 import prisma from "../lib/prisma.js";
 import { GetCompanyIdByUser } from "../lib/utils.js";
-export const get = async (req, res) => {
-  const { filter } = req.query;
-  let filterObject = {}
+export const get = async ({ firstName, lastName }) => {
   const comId = GetCompanyIdByUser()
-  if (filter) {
-    filterObject = {
-      where: {
-        cliFirstName: {
-          contains: filter,
-        },
-        cliLastName: {
-          contains: filter,
-        },
-        cliComId: comId
-      }
+  let filter = {
+    where: {
+      cliComId: comId,
+      cliDeleted: 0
     }
-  };
-
-  const clients = await prisma.clients.findMany(filterObject);
+  }
+  if (firstName) {
+    filter.where.cliFirstName = {
+      contains: firstName,
+    }
+  }
+  if (lastName) {
+    filter.where.cliLastName = {
+      contains: lastName,
+    }
+  }
+  console.log(filter)
+  const clients = await prisma.clients.findMany(filter);
   const result = clients.map(item =>
   ({
     id: item.cliId,
-    name: item.cliFirstName + " " + item.cliLastName,
     firstName: item.cliFirstName,
     lastName: item.cliLastName,
     email: item.cliEmail,
-    phone: item.cliPhone,
-    comId: item.cliComId,
+    phone: item.cliPhone
   }))
-  return { clients }
+  return result
 
 };
-export const getById = async (req, res) => {
+export const getById = async (id) => {
 
-  const { cliId } = req.query;
-  const result = null
-  if (cliId) {
+
+  let result = null
+  if (id) {
     const comId = GetCompanyIdByUser()
     const Client = await prisma.clients.findFirst({
       where: {
-        cliId: cliId,
+        cliId: Number(id),
         cliComId: comId
       },
     });
     result = {
       id: Client.cliId,
-      name: item.cliFirstName + " " + item.cliLastName,
-      firstName: item.cliFirstName,
-      lastName: item.cliLastName,
+      firstName: Client.cliFirstName,
+      lastName: Client.cliLastName,
       email: Client.cliEmail,
-      phone: Client.cliPhone,
-      comId: Client.cliComId,
+      phone: Client.cliPhone
     }
   }
   return result;
 
 
 };
-export const add = async (req, res) => {
+export const add = async (client) => {
 
-  const { firstName, lastName, email, phone } = req.body;
+
   const comId = GetCompanyIdByUser()
   const Client = await prisma.clients.create({
     data: {
-      cliFirstName: firstName, cliLastName: lastName, cliEmail: email,
-      cliPhone: phone, cliComId: comId
+      cliFirstName: client.firstName,
+      cliLastName: client.lastName,
+      cliEmail: client.email,
+      cliPhone: client.phone,
+      cliComId: comId
     },
   });
   return Client;
 
 };
-export const update = async (req, res) => {
-  try {
-    const { id, firstName, lastName, email, phone } = req.body;
-    const ClientUpdate = await prisma.clients.update({
-      where: { cliId: id },
-      data: {
-        cliFirstName: firstName, cliLastName: lastName, cliEmail: email,
-        cliPhone: phone
-      },
-    });
-    res.status(200).json(ClientUpdate);
-  } catch (err) {
-    res.status(404).json({ error: err });
-  }
+export const update = async ({ id, firstName, lastName, email, phone }) => {
+  const ClientUpdate = await prisma.clients.update({
+    where: { cliId: id },
+    data: {
+      cliFirstName: firstName,
+      cliLastName: lastName,
+      cliEmail: email,
+      cliPhone: phone
+    },
+  });
+  return ClientUpdate
 };
-export const remove = async (req, res) => {
+export const remove = async (id) => {
 
-  const { cliId } = req.query;
-  const ClientDelete = await prisma.clients.delete({
-    where: { cliId: cliId },
+
+  const ClientDelete = await prisma.clients.update({
+    where: { cliId: id }, data: {
+      cliDeleted: 1
+    }
   });
   return ClientDelete;
 

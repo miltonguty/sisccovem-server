@@ -1,10 +1,10 @@
 import express from 'express';
-import { add, get, getById, remove } from '../controller/Clients.js';
+import { add, get, getById, remove, update } from '../../controller/Clients.js';
 var router = express.Router();
 router.get('/clients', async function(req, res) {
     try {
-        console.log("------------")
-        const result = await get(req, res);
+        const { filter } = req.query;
+        const result = await get(filter);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -14,7 +14,8 @@ router.get('/clients', async function(req, res) {
 });
 router.post('/clients', async function(req, res) {
     try {
-        const result = await add(req, res);
+        const { firstName, lastName, email, phone } = req.body;
+        const result = await add({ firstName, lastName, email, phone });
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -24,7 +25,8 @@ router.post('/clients', async function(req, res) {
 });
 router.put('/clients', async function(req, res) {
     try {
-        const result = await update(req, res);
+        const { id, firstName, lastName, email, phone } = req.body;
+        const result = await update({ id, firstName, lastName, email, phone });
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -34,7 +36,8 @@ router.put('/clients', async function(req, res) {
 });
 router.get('/clients/:cliId', async function(req, res) {
     try {
-        const result = await getById(req, res);
+        const { id } = req.query;
+        const result = await getById(id);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -44,7 +47,8 @@ router.get('/clients/:cliId', async function(req, res) {
 });
 router.delete('/clients/:cliId', async function(req, res) {
     try {
-        const result = await remove(req, res);
+        const { cliId } = req.query;
+        const result = await remove(cliId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)

@@ -8,7 +8,7 @@ datasource db {
 }
 
 model clients {
-  cliId        Int       @id(map: "PK__clients__7F6E8DA931E2B7FF")
+  cliId        Int       @id(map: "PK__clients__7F6E8DA931E2B7FF") @default(autoincrement())
   cliCreatedAt DateTime  @default(now(), map: "DF__clients__cliCrea__4CA06362") @db.DateTime
   cliUpdatedAt DateTime? @db.DateTime
   cliDeleted   Int       @default(0, map: "DF__clients__cliDele__4BAC3F29") @db.TinyInt
@@ -22,7 +22,7 @@ model clients {
 }
 
 model companys {
-  comId        Int         @id(map: "PK__companys__9052B556CFF15B7E")
+  comId        Int         @id(map: "PK__companys__9052B556CFF15B7E") @default(autoincrement())
   comCreatedAt DateTime    @default(now(), map: "DF__companys__comCre__4D94879B") @db.DateTime
   comUpdatedAt DateTime?   @db.DateTime
   comDeleted   Int         @default(0, map: "DF__companys__comDel__4F7CD00D") @db.TinyInt
@@ -37,7 +37,7 @@ model companys {
 }
 
 model employees {
-  empId        Int       @id(map: "PK__employee__AFB3EC0D45B02134")
+  empId        Int       @id(map: "PK__employee__AFB3EC0D45B02134") @default(autoincrement())
   empCreatedAt DateTime  @default(now(), map: "DF__employees__empCr__52593CB8") @db.DateTime
   empUpdatedAt DateTime? @db.DateTime
   empDeleted   Int       @default(0, map: "DF__employees__empDe__5441852A") @db.TinyInt
@@ -51,7 +51,7 @@ model employees {
 }
 
 model products {
-  proId            Int                @id(map: "PK__products__5BBBEEF596910226")
+  proId            Int                @id(map: "PK__products__5BBBEEF596910226") @default(autoincrement())
   procreatedAt     DateTime           @default(now(), map: "DF__products__procre__5629CD9C") @db.DateTime
   proUpdatedAt     DateTime?          @db.DateTime
   proDeleted       Int                @default(0, map: "DF__products__proDel__5812160E") @db.TinyInt
@@ -101,10 +101,10 @@ model purchasesdetails {
 }
 
 model sales {
+  salId        Int            @id(map: "PK__sales__E3E89296E89D3966") @default(autoincrement())
   salCreatedAt DateTime       @default(now(), map: "DF__sales__salCreate__6A30C649") @db.DateTime
   salUpdatedAt DateTime?      @db.DateTime
   salDeleted   Int            @default(0, map: "DF__sales__salDelete__6C190EBB") @db.TinyInt
-  salId        Int            @id(map: "PK__sales__E3E89296E89D3966")
   salDate      DateTime       @default(now(), map: "DF__sales__salDate__6D0D32F4") @db.DateTime
   salTotal     Float          @default(0, map: "DF__sales__salTotal__6E01572D")
   salLiteral   String         @db.NVarChar(191)
@@ -117,10 +117,10 @@ model sales {
 }
 
 model salesdetails {
+  sadId              Int       @id(map: "PK__salesdet__E1DF92118062A7F2") @default(autoincrement())
   sadCreatedAt       DateTime  @default(now(), map: "DF__salesdeta__sadCr__6A30C649") @db.DateTime
   sadUpdatedAt       DateTime? @db.DateTime
   sadDeleted         Int       @default(0, map: "DF__salesdeta__sadDe__6C190EBB") @db.TinyInt
-  sadId              Int       @id(map: "PK__salesdet__E1DF92118062A7F2")
   sadProdId          Int
   sadProdDescription String    @db.NVarChar(191)
   sadProdPrice       Float     @default(0, map: "DF__salesdeta__sadPr__6D0D32F4")
@@ -134,7 +134,7 @@ model salesdetails {
 }
 
 model suppliers {
-  supId        Int         @id(map: "PK__supplier__B4F221B29C214A40")
+  supId        Int         @id(map: "PK__supplier__B4F221B29C214A40") @default(autoincrement())
   supCreatedAt DateTime    @default(now(), map: "DF__suppliers__supCr__778AC167") @db.DateTime
   supUpdatedAt DateTime?   @db.DateTime
   supDeleted   Int         @default(0, map: "DF__suppliers__supDe__797309D9") @db.TinyInt
@@ -148,7 +148,7 @@ model suppliers {
 }
 
 model users {
-  useId        Int       @id(map: "PK__users__2B8F3A10797D7EF1")
+  useId        Int       @id(map: "PK__users__2B8F3A10797D7EF1") @default(autoincrement())
   useCreatedAt DateTime  @default(now(), map: "DF__users__useCreate__7D439ABD") @db.DateTime
   useUpdatedAt DateTime? @db.DateTime
   useDeleted   Int       @default(0, map: "DF__users__useDelete__7F2BE32F") @db.TinyInt
@@ -157,4 +157,14 @@ model users {
   useEmail     String    @db.NVarChar(191)
   useComId     Int
   companys     companys  @relation(fields: [useComId], references: [comId], onUpdate: NoAction, map: "FK_users_companys")
+}
+
+model sysdiagrams {
+  name         String @db.NVarChar(128)
+  principal_id Int
+  diagram_id   Int    @id(map: "PK__sysdiagr__C2B05B6192073B9A") @default(autoincrement())
+  version      Int?
+  definition   Bytes?
+
+  @@unique([principal_id, name], map: "UK_principal_name")
 }

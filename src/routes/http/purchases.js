@@ -1,5 +1,5 @@
 import express, { json } from 'express';
-import { add, get, getById, remove } from '../controller/Purchases.js';
+import { add, get, getById, remove } from '../../controller/Purchases.js';
 var router = express.Router();
 router.get('/Purchases', async function(req, res) {
     try {

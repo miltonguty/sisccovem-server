@@ -1,7 +1,7 @@
 import express, { json } from 'express';
-import { add, get, getById, remove } from '../controller/Products.js';
+import { add, get, getById, remove } from '../../controller/Suppliers.js';
 var router = express.Router();
-router.get('/Products', async function(req, res) {
+router.get('/Suppliers', async function(req, res) {
     try {
         const result = await get(req, res);
         res.status(200).json(result);
@@ -11,7 +11,7 @@ router.get('/Products', async function(req, res) {
     }
 
 });
-router.post('/Products', async function(req, res) {
+router.post('/Suppliers', async function(req, res) {
     try {
         const result = await add(req, res);
         res.status(200).json(result);
@@ -21,7 +21,7 @@ router.post('/Products', async function(req, res) {
     }
 
 });
-router.put('/Products', async function(req, res) {
+router.put('/Suppliers', async function(req, res) {
     try {
         const result = await update(req, res);
         res.status(200).json(result);
@@ -31,7 +31,7 @@ router.put('/Products', async function(req, res) {
     }
 
 });
-router.get('/Products/:proId', async function(req, res) {
+router.get('/Suppliers/:supId', async function(req, res) {
     try {
         const result = await getById(req, res);
         res.status(200).json(result);
@@ -41,7 +41,7 @@ router.get('/Products/:proId', async function(req, res) {
     }
 
 });
-router.delete('/Products/:proId', async function(req, res) {
+router.delete('/Suppliers/:supId', async function(req, res) {
     try {
         const result = await remove(req, res);
         res.status(200).json(result);

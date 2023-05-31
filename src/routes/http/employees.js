@@ -1,5 +1,5 @@
 import express, { json } from 'express';
-import { add, get, getById, remove } from '../controller/Employees.js';
+import { add, get, getById, remove } from '../../controller/Employees.js';
 var router = express.Router();
 router.get('/Employees', async function(req, res) {
     try {

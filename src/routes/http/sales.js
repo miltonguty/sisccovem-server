@@ -1,9 +1,9 @@
 import express, { json } from 'express';
-import { add, get, getById, remove } from '../controller/Suppliers.js';
+import { AddDetails, CloseNoteSales,  GetOrCreateNoteSales, RemoveDetails } from '../../controller/Sales.js';
 var router = express.Router();
-router.get('/Suppliers', async function(req, res) {
+router.get('/Sales', async function(req, res) {
     try {
-        const result = await get(req, res);
+        const result = await GetOrCreateNoteSales(req, res);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -11,9 +11,9 @@ router.get('/Suppliers', async function(req, res) {
     }
 
 });
-router.post('/Suppliers', async function(req, res) {
+router.post('/Sales', async function(req, res) {
     try {
-        const result = await add(req, res);
+        const result = await AddDetails(req, res);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -21,9 +21,9 @@ router.post('/Suppliers', async function(req, res) {
     }
 
 });
-router.put('/Suppliers', async function(req, res) {
+router.delete('/Sales', async function(req, res) {
     try {
-        const result = await update(req, res);
+        const result = await RemoveDetails(req, res);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -31,7 +31,17 @@ router.put('/Suppliers', async function(req, res) {
     }
 
 });
-router.get('/Suppliers/:supId', async function(req, res) {
+router.put('/Sales', async function(req, res) {
+    try {
+        const result = await CloseNoteSales(req, res);
+        res.status(200).json(result);
+    } catch (err) {
+        console.log(err)
+        res.status(404).json({ error: err });
+    }
+
+});
+router.get('/Sales/:salId', async function(req, res) {
     try {
         const result = await getById(req, res);
         res.status(200).json(result);
@@ -41,14 +51,5 @@ router.get('/Suppliers/:supId', async function(req, res) {
     }
 
 });
-router.delete('/Suppliers/:supId', async function(req, res) {
-    try {
-        const result = await remove(req, res);
-        res.status(200).json(result);
-    } catch (err) {
-        console.log(err)
-        res.status(404).json({ error: err });
-    }
 
-});
 export default router;
