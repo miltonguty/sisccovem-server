@@ -1,29 +1,32 @@
 /*** CONTROLLER*/
 import prisma from "../lib/prisma.js";
-import { GetCompanyIdByUser } from "../lib/utils.js";
-export const get = async (req, res) =>
-{
+import { GetEmpresaIdByUser } from "../lib/utils.js";
+export const get = async ({ description }) => {
 
-  const { filter } = req.query;
-  const comId = GetCompanyIdByUser()
-  let filterObject = {
+
+  const comId = GetEmpresaIdByUser()
+  let filter = {
     where: {
       proComId: Number(comId)
     }
   }
-
-  if (filter)
-  {
-    filterObject = {
-      where: {
+  const orConditions = []
+  if (description) {
+    orConditions.push(
+      {
         proDescription: {
-          contains: filter,
-        },
-      }
-    }
-  };
+          contains: description,
+        }
+      })
+  }
+  
+  if (orConditions.length > 0) {
+    filter.where.OR = orConditions
+  }
 
-  const products = await prisma.products.findMany(filterObject);
+ 
+
+  const products = await prisma.products.findMany(filter);
   const result = products.map(item =>
   ({
     id: item.proId,
@@ -35,16 +38,14 @@ export const get = async (req, res) =>
     proId: item.proproId,
     stock: item.proStock,
   }))
-  return result;
+  return result
 
 };
-export const getById = async (req, res) =>
-{
-  const { proId } = req.query;
-  const comId = GetCompanyIdByUser()
+export const getById = async (proId) => {
+
+  const comId = GetEmpresaIdByUser()
   let result = null
-  if (proId)
-  {
+  if (proId) {
     const Product = await prisma.products.findFirst({
       where: {
         proId: proId,
@@ -65,9 +66,8 @@ export const getById = async (req, res) =>
   return result;
 
 };
-export const add = async (req, res) =>
-{
-  const comId = GetCompanyIdByUser()
+export const add = async (req, res) => {
+  const comId = GetEmpresaIdByUser()
   const { description, priceSales, pricePurchase, image, supId } = req.body;
   const Product = await prisma.products.create({
     data: {
@@ -83,8 +83,7 @@ export const add = async (req, res) =>
   return Product;
 
 };
-export const update = async (req, res) =>
-{
+export const update = async (req, res) => {
 
   const { id, description, priceSales, pricePurchase, image, supId, stock } = req.body;
   const ProductUpdate = await prisma.products.update({
@@ -101,10 +100,9 @@ export const update = async (req, res) =>
   return ProductUpdate;
 
 };
-export const remove = async (req, res) =>
-{
-  const { proId } = req.query;
-  const comId = GetCompanyIdByUser()
+export const remove = async (proId) => {
+
+  const comId = GetEmpresaIdByUser()
   const ProductDelete = await prisma.products.update({
     where: { proId: Number(proId), proComId: Number(comId) },
     data: { proDeleted: true }

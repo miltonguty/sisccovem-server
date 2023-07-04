@@ -20,7 +20,7 @@ export const get = async (filter) => {
 };
 export const getById = async (useId) => {
 
-  const comId = GetCompanyIdByUser()
+  const comId = GetEmpresaIdByUser()
   let result = null
   if (useId) {
     const user = await prisma.users.findFirst({

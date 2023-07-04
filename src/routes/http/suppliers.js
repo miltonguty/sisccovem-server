@@ -1,9 +1,11 @@
 import express, { json } from 'express';
 import { add, get, getById, remove } from '../../controller/Suppliers.js';
+import { SetFilterSuppliers } from '../../lib/Filters.js';
 var router = express.Router();
 router.get('/Suppliers', async function(req, res) {
     try {
-        const result = await get(req, res);
+        const filter = SetFilterSuppliers(req.query)
+        const result = await get(filter);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)

@@ -1,10 +1,9 @@
 /*** CONTROLLER*/
 import prisma from "../lib/prisma.js";
-import { GetCompanyIdByUser } from "../lib/utils.js";
-export const get = async (req, res) => {
+import { GetEmpresaIdByUser } from "../lib/utils.js";
+export const get = async (filter) => {
 
-  const { filter } = req.query;
-  const comId = GetCompanyIdByUser()
+  const comId = GetEmpresaIdByUser()
   let filterObject = {
     where: {
       supComId: Number(comId)
@@ -35,9 +34,8 @@ export const get = async (req, res) => {
   return result;
 
 };
-export const getById = async (req, res) => {
-  const comId = GetCompanyIdByUser()
-  const { supId } = req.query;
+export const getById = async (supId) => {
+  const comId = GetEmpresaIdByUser()
   let result = null
   if (supId) {
     const supplier = await prisma.suppliers.findFirst({
@@ -54,17 +52,15 @@ export const getById = async (req, res) => {
   return result;
 
 };
-export const add = async (req, res) => {
-  const comId = GetCompanyIdByUser()
-  const { name, phone, address, image } = req.body;
+export const add = async ({ name, phone, address, image }) => {
+  const comId = GetEmpresaIdByUser()
   const supplier = await prisma.suppliers.create({
     data: { supName: name, supPhone: phone, supAddress: address, supImage: image, supComId: comId },
   });
   return supplier;
 
 };
-export const update = async (req, res) => {
-  const { id, name, phone, address, image } = req.body;
+export const update = async ({ id, name, phone, address, image }) => {
   const supplierUpdate = await prisma.suppliers.update({
     where: { supId: id },
     data: { supName: name, supPhone: phone, supAddress: address, supImage: image },
@@ -72,8 +68,7 @@ export const update = async (req, res) => {
   return supplierUpdate;
 
 };
-export const remove = async (req, res) => {
-  const { supId } = req.query;
+export const remove = async (supId) => {
   const supplierDelete = await prisma.suppliers.delete({
     where: { supId: supId },
   });

@@ -1,43 +1,75 @@
 /*** CONTROLLER*/
 import prisma from "../lib/prisma.js";
-import { GetCompanyIdByUser } from "../lib/utils.js";
-export const get = async ({ firstName, lastName }) => {
-  const comId = GetCompanyIdByUser()
-  let filter = {
-    where: {
-      cliComId: comId,
-      cliDeleted: 0
+import { GetEmpresaIdByUser } from "../lib/utils.js";
+export const
+  get = async ({ firstName, lastName, email, phone, pageSize, page }) => {
+    const comId = GetEmpresaIdByUser()
+    let filter = {
+      skip: Number(page * pageSize),
+      take: Number(pageSize),
+      where: {
+        cliComId: comId,
+        cliDeleted: 0
+      }
     }
-  }
-  if (firstName) {
-    filter.where.cliFirstName = {
-      contains: firstName,
+    const orConditions = []
+    if (firstName) {
+      orConditions.push(
+        {
+          cliFirstName: {
+            contains: firstName,
+          }
+        })
     }
-  }
-  if (lastName) {
-    filter.where.cliLastName = {
-      contains: lastName,
-    }
-  }
-  console.log(filter)
-  const clients = await prisma.clients.findMany(filter);
-  const result = clients.map(item =>
-  ({
-    id: item.cliId,
-    firstName: item.cliFirstName,
-    lastName: item.cliLastName,
-    email: item.cliEmail,
-    phone: item.cliPhone
-  }))
-  return result
 
-};
+    if (lastName) {
+      orConditions.push(
+        {
+          cliLastName: {
+            contains: lastName,
+          }
+        })
+    }
+    if (email) {
+      orConditions.push(
+        {
+          cliEmail: {
+            contains: email,
+          }
+        }
+      )
+    }
+    if (phone) {
+      orConditions.push(
+        {
+          cliPhone: {
+            contains: phone,
+          }
+        })
+    }
+    if (orConditions.length > 0) {
+      filter.where.OR = orConditions
+    }
+
+    console.log(filter)
+    const clients = await prisma.clients.findMany(filter);
+    const result = clients.map(item =>
+    ({
+      id: item.cliId,
+      firstName: item.cliFirstName,
+      lastName: item.cliLastName,
+      email: item.cliEmail,
+      phone: item.cliPhone
+    }))
+    return result
+
+  };
 export const getById = async (id) => {
 
 
   let result = null
   if (id) {
-    const comId = GetCompanyIdByUser()
+    const comId = GetEmpresaIdByUser()
     const Client = await prisma.clients.findFirst({
       where: {
         cliId: Number(id),
@@ -59,7 +91,7 @@ export const getById = async (id) => {
 export const add = async (client) => {
 
 
-  const comId = GetCompanyIdByUser()
+  const comId = GetEmpresaIdByUser()
   const Client = await prisma.clients.create({
     data: {
       cliFirstName: client.firstName,
@@ -74,7 +106,7 @@ export const add = async (client) => {
 };
 export const update = async ({ id, firstName, lastName, email, phone }) => {
   const ClientUpdate = await prisma.clients.update({
-    where: { cliId: id },
+    where: { cliId: Number(id) },
     data: {
       cliFirstName: firstName,
       cliLastName: lastName,
@@ -85,10 +117,11 @@ export const update = async ({ id, firstName, lastName, email, phone }) => {
   return ClientUpdate
 };
 export const remove = async (id) => {
-
-
+  const comId = GetEmpresaIdByUser()
   const ClientDelete = await prisma.clients.update({
-    where: { cliId: id }, data: {
+    where: {
+      cliId: Number(id)      
+    }, data: {
       cliDeleted: 1
     }
   });

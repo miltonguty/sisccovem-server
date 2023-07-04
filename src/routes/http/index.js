@@ -1,5 +1,5 @@
 import ClientsRoute from './clients.js'
-import CompanysRoute from './companys.js'
+import EmpresasRoute from './companys.js'
 import EmployeesRoute from './employees.js'
 import ProductsRoute from './products.js'
 import PurchasesRoute from './purchases.js'
@@ -9,7 +9,7 @@ import salesRoute from './sales.js'
 
 export default {
     ClientsRoute,
-    CompanysRoute,
+    EmpresasRoute,
     EmployeesRoute,
     ProductsRoute,
     PurchasesRoute,

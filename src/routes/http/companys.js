@@ -1,9 +1,11 @@
 import express, { json } from 'express';
-import { add, get, getById, remove } from '../../controller/Companys.js';
+import { add, get, getById, remove, update } from '../../controller/Company.js';
+import { SetFilterCompany } from '../../lib/Filters.js';
 var router = express.Router();
 router.get('/companys', async function(req, res) {
     try {
-        const result = await get(req, res);
+        const filter = SetFilterCompany(req.query)
+        const result = await get(filter);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -13,7 +15,8 @@ router.get('/companys', async function(req, res) {
 });
 router.post('/companys', async function(req, res) {
     try {
-        const result = await add(req, res);
+        const { name, phone, address } = req.body
+        const result = await add({ name, phone, address });
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -21,9 +24,11 @@ router.post('/companys', async function(req, res) {
     }
 
 });
-router.put('/companys', async function(req, res) {
+router.put('/companys/:id', async function(req, res) {
     try {
-        const result = await update(req, res);
+        const { id } = req.params
+        const { name, phone, address } = req.body
+        const result = await update({ id, name, phone, address });
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -33,7 +38,8 @@ router.put('/companys', async function(req, res) {
 });
 router.get('/companys/:comId', async function(req, res) {
     try {
-        const result = await getById(req, res);
+        const { comId } = req.params
+        const result = await getById(comId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)

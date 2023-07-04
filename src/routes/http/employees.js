@@ -1,9 +1,11 @@
 import express, { json } from 'express';
-import { add, get, getById, remove } from '../../controller/Employees.js';
+import { add, get, getById, remove, update } from '../../controller/Employees.js';
+import { SetFilterEmployee } from '../../lib/Filters.js';
 var router = express.Router();
 router.get('/Employees', async function(req, res) {
     try {
-        const result = await get(req, res);
+        const filter = SetFilterEmployee(req.query)
+        const result = await get(filter);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -13,7 +15,8 @@ router.get('/Employees', async function(req, res) {
 });
 router.post('/Employees', async function(req, res) {
     try {
-        const result = await add(req, res);
+        const { firstName, lastName, email, phone, salary } = req.body;
+        const result = await add({ firstName, lastName, email, phone, salary });
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -21,9 +24,11 @@ router.post('/Employees', async function(req, res) {
     }
 
 });
-router.put('/Employees', async function(req, res) {
+router.put('/Employees/:id', async function(req, res) {
     try {
-        const result = await update(req, res);
+        const { id } = req.params
+        const { firstName, lastName, email, phone, salary } = req.body;
+        const result = await update({ id, firstName, lastName, email, phone, salary });
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -33,7 +38,8 @@ router.put('/Employees', async function(req, res) {
 });
 router.get('/Employees/:empId', async function(req, res) {
     try {
-        const result = await getById(req, res);
+        const { empId } = req.params
+        const result = await getById(empId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -43,7 +49,8 @@ router.get('/Employees/:empId', async function(req, res) {
 });
 router.delete('/Employees/:empId', async function(req, res) {
     try {
-        const result = await remove(req, res);
+        const { empId } = req.params
+        const result = await remove(empId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)

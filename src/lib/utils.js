@@ -1,16 +1,12 @@
-export function makeSerializable(o)
-{
+export function makeSerializable (o) {
   return JSON.parse(JSON.stringify(o));
 }
-export function GetCompanyIdByUser(userId = "") 
-{
+export function GetEmpresaIdByUser (userId = "") {
   return 1;
 }
-export function GetPurchaseId(userId = "") 
-{
+export function GetPurchaseId (userId = "") {
   return 1;
 }
-export function GetCurrentUserId() 
-{
+export function GetCurrentUserId () {
   return 1;
 }

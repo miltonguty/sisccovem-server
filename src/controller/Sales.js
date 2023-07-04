@@ -1,7 +1,7 @@
 /*** CONTROLLER*/
 import createPdf from "../lib/PdfFiles.js";
 import prisma from "../lib/prisma.js";
-import { GetCompanyIdByUser, GetCurrentUserId } from "../lib/utils.js";
+import { GetEmpresaIdByUser, GetCurrentUserId } from "../lib/utils.js";
 export const NOTE_SALES_CLOSE = true;
 export const NOTE_SALES_OPEN = false;
 const GetCurrentNoteSalesByUser = async () => {
@@ -81,7 +81,7 @@ export const GetById = async (req, res) =>
   try
   {
     const { salId } = req.query;
-    const comId = GetCompanyIdByUser()
+    const comId = GetEmpresaIdByUser()
     if (salId)
     {
       const Sale = await prisma.sales.findFirst({
@@ -109,7 +109,7 @@ export const GetOrCreateNoteSales = async (req, res) => {
   let currentSalesNote = await GetCurrentNoteSalesByUser()
   if (currentSalesNote == null) {
     const userId = GetCurrentUserId()
-    const ComId = GetCompanyIdByUser(userId)
+    const ComId = GetEmpresaIdByUser(userId)
     const { cliId } = req.body;
     const sales = await prisma.sales.create({
       data: { salComId: Number(ComId), salUseId: Number(userId), salLiteral: "cero", salCliId: Number(1) },

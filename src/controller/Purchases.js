@@ -1,9 +1,8 @@
 /*** CONTROLLER*/
 import prisma from "../lib/prisma.js";
-import { GetCompanyIdByUser, GetCurrentUserId } from "../lib/utils.js";
-export const get = async (req, res) => {
+import { GetEmpresaIdByUser, GetCurrentUserId } from "../lib/utils.js";
+export const get = async (filter) => {
 
-  const { filter } = req.query;
   let filterObject = {}
 
   if (filter) {
@@ -48,7 +47,7 @@ export const getById = async (req, res) => {
 export const add = async (req, res) => {
 
   const userId = GetCurrentUserId()
-  const ComId = GetCompanyIdByUser(userId)
+  const ComId = GetEmpresaIdByUser(userId)
 
   const Purchase = await prisma.purchases.create({
     data: { purComId: ComId },
@@ -72,16 +71,13 @@ export const update = async (req, res) => {
   return PurchaseUpdate
 
 };
-export const remove = async (req, res) => {
-  const { purId } = req.query;
+export const remove = async (purId) => {
+
   const PurchaseDelete = await prisma.purchases.update({
     where: { purId: purId },
     data: { purDeleted: true },
   });
-  const purchasesDetailsDelete = await prisma.purchasesDetails.update({
-    where: { pudId: purId },
-    data: { pudDeleted: true },
-  });
-  return { purchase: PurchaseDelete, purchaseDetails: purchasesDetailsDelete };
+
+  return PurchaseDelete
 
 };
