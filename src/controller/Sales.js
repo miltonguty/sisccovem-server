@@ -2,13 +2,13 @@
 import createPdf from "../lib/PdfFiles.js";
 import prisma from "../lib/prisma.js";
 import { GetEmpresaIdByUser, GetCurrentUserId } from "../lib/utils.js";
-export const NOTE_SALES_CLOSE = true;
-export const NOTE_SALES_OPEN = false;
+export const NOTE_SALES_CLOSE = 1;
+export const NOTE_SALES_OPEN = 0;
 const GetCurrentNoteSalesByUser = async () => {
   const userId = GetCurrentUserId()
   const currentSales = await prisma.sales.findMany({
     where: {
-      salDeleted: false,
+      salDeleted: 0,
       salClose: NOTE_SALES_OPEN,
       salUseId: Number(userId),
     },
@@ -19,12 +19,17 @@ const GetCurrentNoteSalesByUser = async () => {
   let currentSalesNote = null
   if (currentSales.length >= 1) {
     const currentSale = currentSales[0]
+    const client = await prisma.clients.findFirst(currentSale.salCliId)
+
+
     currentSalesNote = {
       id: currentSale.salId,
-      date: currentSale.salDate,
       total: currentSale.salTotal,
-      comId: currentSale.salComId,
-      cliId: currentSale.salCliId,
+      client: {
+        firstName: client.cliFirstName,
+        lastName: client.cliLastName,
+        id: client.cliId
+      },
       salesdetails: []
     }
     currentSale.salesdetails.map(detail => {
@@ -140,7 +145,7 @@ export const RemoveDetails = async (req, res) => {
   let currentSalesNote = await GetCurrentNoteSalesByUser()
   const SalesDetailDelete = await prisma.salesdetails.update({
     where: { sadId: sadId, sadSalId: currentSalesNote.salId },
-    data: { sadDeleted: true },
+    data: { sadDeleted: 1 },
   });
   const salesDetail = {
     id: SalesDetailDelete.sadId,

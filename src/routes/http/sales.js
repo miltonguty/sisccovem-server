@@ -1,7 +1,7 @@
 import express, { json } from 'express';
 import { AddDetails, CloseNoteSales,  GetOrCreateNoteSales, RemoveDetails } from '../../controller/Sales.js';
 var router = express.Router();
-router.get('/Sales', async function(req, res) {
+router.get('/CurrenNoteSales', async function(req, res) {
     try {
         const result = await GetOrCreateNoteSales(req, res);
         res.status(200).json(result);
