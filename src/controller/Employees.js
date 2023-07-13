@@ -9,7 +9,7 @@ export const get = async ({ firstName, lastName, email, phone, pageSize, page })
     skip: Number(page * pageSize),
     take: Number(pageSize),
     where: {
-      empDeleted: 0
+      empDeleted: FALSE
     }
   }
   const orConditions = []

@@ -1,4 +1,5 @@
 /*** CONTROLLER*/
+import { FALSE, TRUE } from "../constants";
 import prisma from "../lib/prisma";
 import { GetCurrentUserId } from "../lib/utils";
 
@@ -10,14 +11,14 @@ export const get = async (req, res) => {
       where: {
         sadUseId: userId,
         sadSalId: null,
-        sadDeleted: false,
+        sadDeleted: FALSE,
       }
     }
 
     if (filter) {
       filterObject = {
         where: {
-          sadDeleted: false,
+          sadDeleted: FALSE,
           sadCounter: {
             contains: filter,
           },
@@ -93,7 +94,7 @@ export const remove = async (req, res) => {
     const { sadId } = req.query;
     const SalesDetailDelete = await prisma.salesdetails.update({
       where: { sadId: sadId },
-      data: { sadDeleted: true },
+      data: { sadDeleted: TRUE },
     });
     res.status(200).json(SalesDetailDelete);
   } catch (err) {
@@ -106,7 +107,7 @@ const CreateUpdatesalesdetails = async (req, res) => {
   const { id, proId, count } = req.body;
   const userId = GetCurrentUserId()
   const SalesDetail = await prisma.salesdetails.findFirst({
-    where: { sadProdId: proId, sadUseId: userId, sadDeleted: false, sadSalId: null },
+    where: { sadProdId: proId, sadUseId: userId, sadDeleted: FALSE, sadSalId: null },
   });
   const product = await prisma.Products.findFirst({
     where: { proId: proId },
@@ -122,10 +123,10 @@ const CreateUpdatesalesdetails = async (req, res) => {
 
     SalesDetailUpdate = await prisma.salesdetails.create({
       data: {
-        sadProdId: proId,
-        sadProdprice: 7,
+        sadProdId: Number(proId),
+        sadProdprice: Number(7),
         sadProdDescription: product.proDescription,
-        sadProdCount: count,
+        sadProdCount: Number(count),
         sadUseId: userId
       },
     })

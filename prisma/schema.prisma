@@ -61,7 +61,6 @@ model products {
   proImage         String?            @db.NVarChar(191)
   proComId         Int
   proStock         Float              @default(0, map: "DF__products__proSto__5BE2A6F2")
-  proSupId         Int
   companys         companys           @relation(fields: [proComId], references: [comId], onUpdate: NoAction, map: "FK_products_companys")
   purchasesdetails purchasesdetails[]
   salesdetails     salesdetails[]
@@ -93,9 +92,9 @@ model purchasesdetails {
   pudProdCount       Float     @default(0, map: "DF__purchases__pudPr__5BE2A6F2")
   pudUseId           Int
   pudPurId           Int
-  pudSubTotal        Float     @default(0, map: "DF__purchases__pudSu__5CD6CB2B")
   pudProdPrice       Float     @default(0, map: "DF__purchases__pudPr__5DCAEF64")
   pudLastItem        Int       @default(0, map: "DF__purchases__pudLa__5EBF139D") @db.TinyInt
+  pudSubTotal        Float     @default(0.00, map: "DF__purchases__pudSu__1BC821DD")
   products           products  @relation(fields: [pudProdId], references: [proId], onUpdate: NoAction, map: "FK_purchasesdetails_products")
   purchases          purchases @relation(fields: [pudPurId], references: [purId], onUpdate: NoAction, map: "FK_purchasesdetails_purchases")
 }
@@ -127,8 +126,8 @@ model salesdetails {
   sadProdCount       Float     @default(0, map: "DF__salesdeta__sadPr__6E01572D")
   sadUseId           Int
   sadSalId           Int
-  sadSubTotal        Float     @default(0, map: "DF__salesdeta__sadSu__6EF57B66")
   salLastItem        Int       @default(0, map: "DF__salesdeta__salLa__6FE99F9F") @db.TinyInt
+  sadSubTotal        Float     @default(0.00, map: "DF__salesdeta__sadSu__1CBC4616")
   products           products  @relation(fields: [sadProdId], references: [proId], onUpdate: NoAction, map: "FK_salesdetails_products")
   sales              sales     @relation(fields: [sadSalId], references: [salId], onUpdate: NoAction, map: "FK_salesdetails_sales")
 }
@@ -147,6 +146,16 @@ model suppliers {
   companys     companys    @relation(fields: [supComId], references: [comId], onUpdate: NoAction, map: "FK_suppliers_companys")
 }
 
+model sysdiagrams {
+  name         String @db.NVarChar(128)
+  principal_id Int
+  diagram_id   Int    @id(map: "PK__sysdiagr__C2B05B61A45B58B8") @default(autoincrement())
+  version      Int?
+  definition   Bytes?
+
+  @@unique([principal_id, name], map: "UK_principal_name")
+}
+
 model users {
   useId        Int       @id(map: "PK__users__2B8F3A10797D7EF1") @default(autoincrement())
   useCreatedAt DateTime  @default(now(), map: "DF__users__useCreate__7D439ABD") @db.DateTime
@@ -159,12 +168,11 @@ model users {
   companys     companys  @relation(fields: [useComId], references: [comId], onUpdate: NoAction, map: "FK_users_companys")
 }
 
-model sysdiagrams {
-  name         String @db.NVarChar(128)
-  principal_id Int
-  diagram_id   Int    @id(map: "PK__sysdiagr__C2B05B6192073B9A") @default(autoincrement())
-  version      Int?
-  definition   Bytes?
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model productsupliers {
+  id    Int  @id(map: "PK_productsupliers") @default(autoincrement())
+  proId Int?
+  supId Int?
 
-  @@unique([principal_id, name], map: "UK_principal_name")
+  @@ignore
 }

@@ -1,4 +1,5 @@
 /*** CONTROLLER*/
+import { FALSE } from "../constants.js";
 import prisma from "../lib/prisma.js";
 export const get = async ({ name, phone, address, pageSize, page }) => {
 
@@ -6,7 +7,7 @@ export const get = async ({ name, phone, address, pageSize, page }) => {
     skip: Number(page * pageSize),
     take: Number(pageSize),
     where: {
-      comDeleted: 0
+      comDeleted: FALSE
     }
   }
   const orConditions = []

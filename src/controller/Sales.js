@@ -1,4 +1,5 @@
 /*** CONTROLLER*/
+import { FALSE, TRUE } from "../constants.js";
 import createPdf from "../lib/PdfFiles.js";
 import prisma from "../lib/prisma.js";
 import { GetEmpresaIdByUser, GetCurrentUserId } from "../lib/utils.js";
@@ -8,7 +9,7 @@ const GetCurrentNoteSalesByUser = async () => {
   const userId = GetCurrentUserId()
   const currentSales = await prisma.sales.findMany({
     where: {
-      salDeleted: 0,
+      salDeleted: FALSE,
       salClose: NOTE_SALES_OPEN,
       salUseId: Number(userId),
     },
@@ -19,7 +20,7 @@ const GetCurrentNoteSalesByUser = async () => {
   let currentSalesNote = null
   if (currentSales.length >= 1) {
     const currentSale = currentSales[0]
-    const client = await prisma.clients.findFirst(currentSale.salCliId)
+    const client = await prisma.clients.findFirst({ where: { cliId: currentSale.salCliId } })
 
 
     currentSalesNote = {
@@ -37,10 +38,11 @@ const GetCurrentNoteSalesByUser = async () => {
         currentSalesNote.salesdetails.push({
           id: detail.sadId,
           prodId: detail.sadProdId,
+          description: detail.sadProdDescription,
           price: detail.sadProdPrice,
           count: detail.sadProdCount,
           subTotal: detail.sadSubTotal,
-          description: detail.sadProdDescription
+
         }
         )
       }
@@ -125,27 +127,18 @@ export const GetOrCreateNoteSales = async (req, res) => {
 
 
 }
-export const AddDetails = async (req, res) => {
+export const AddDetails = async (proId, count) => {
 
-  const salesCreated = await CreateUpdateSalesDetails(req, res)
-  /*const salesDetail = {
-    id: SalesDetailCreated.sadId,
-    prodId: SalesDetailCreated.sadProdId,
-    price: SalesDetailCreated.sadProdPrice,
-    count: SalesDetailCreated.sadProdCount,
-    subTotal: SalesDetailCreated.sadSubTotal,
-    description: SalesDetailCreated.sadProdDescription
-  }
-  */
+  const salesCreated = await CreateUpdateSalesDetails(proId, count)
   return salesCreated;
 
 }
-export const RemoveDetails = async (req, res) => {
-  const { sadId } = req.body;
+export const RemoveDetails = async (sadId) => {
+
   let currentSalesNote = await GetCurrentNoteSalesByUser()
   const SalesDetailDelete = await prisma.salesdetails.update({
     where: { sadId: sadId, sadSalId: currentSalesNote.salId },
-    data: { sadDeleted: 1 },
+    data: { sadDeleted: TRUE },
   });
   const salesDetail = {
     id: SalesDetailDelete.sadId,
@@ -175,30 +168,29 @@ export const CloseNoteSales = async (req, res) => {
   return { note: SaleUpdate, pathFile: file };
 
 };
-/*
-export const remove = async (req, res) =>
-{
-  try
-  {
-    const { salId } = req.query;
-    const currentSalesNote = await GetCurrentNoteSalesByUser()
-    const salesDelete = await prisma.sales.update({
-      where: { salId: currentSalesNote.salId },
-      data: { salDeleted: true },
-    });
-    res.status(200).json({ Sales: salesDelete });
-  } catch (err)
-  {
-    res.status(404).json({ error: err });
+export const setClient = async (clientId) => {
+  let currentSalesNote = await GetCurrentNoteSalesByUser()
+  const sales = await prisma.sales.update({
+    where: { salId: currentSalesNote.id },
+    data: {
+      salCliId: Number(clientId)
+    }
+  })
+  const client = await prisma.clients.findFirst({ where: { cliId: clientId } })
+
+  return {
+    id: client.id,
+    firstName: client.cliFirstName,
+    lastName: client.cliLastName
   }
-};*/
-const CreateUpdateSalesDetails = async (req, res) => {
-  const { proId, count } = req.body;
+}
+const CreateUpdateSalesDetails = async (proId, count) => {
+
 
   let currentSalesNote = await GetCurrentNoteSalesByUser()
   const userId = GetCurrentUserId()
   const SalesDetail = await prisma.salesdetails.findFirst({
-    where: { sadProdId: String(proId), sadDeleted: false, sadSalId: currentSalesNote.id },
+    where: { sadProdId: Number(proId), sadDeleted: FALSE, sadSalId: currentSalesNote.id },
   });
   const product = await prisma.products.findFirst({
     where: { proId: proId },
@@ -206,31 +198,43 @@ const CreateUpdateSalesDetails = async (req, res) => {
   await prisma.salesdetails.updateMany({
     where: { sadSalId: currentSalesNote.id },
     data: {
-      salLastItem: false,
+      salLastItem: FALSE,
     }
   });
   let SalesDetailUpdate = {}
   if (SalesDetail) {
     SalesDetailUpdate = await prisma.salesdetails.update({
       where: { sadId: SalesDetail.sadId },
-      data: { sadProdCount: Number(SalesDetail.sadProdCount) + Number(count), salLastItem: true },
+      data: { sadProdCount: Number(SalesDetail.sadProdCount) + Number(count), sadSubTotal: (Number(product.proPriceSales) * (Number(SalesDetail.sadProdCount) + Number(count))), salLastItem: TRUE },
     });
 
   } else {
     SalesDetailUpdate = await prisma.salesdetails.create({
       data: {
-        sadProdId: String(proId),
+        sadProdId: Number(proId),
         sadProdPrice: Number(product.proPriceSales),
         sadProdDescription: product.proDescription,
         sadProdCount: Number(count),
         sadUseId: Number(userId),
         sadSalId: Number(currentSalesNote.id),
-        salLastItem: true
+        sadSubTotal: (Number(product.proPriceSales) * Number(count)),
+        salLastItem: TRUE
       },
     })
   }
-  //const result = await prisma.$executeRaw(`update Sales set salTotal=(select sum(sadSubTotal) from salesdetails where sadSalId='${ currentSalesNote.id }') where salId='${ currentSalesNote.id }';`)
-  currentSalesNote = await GetCurrentNoteSalesByUser()
+
+
+
+  currentSalesNote = {
+    "id": SalesDetailUpdate.sadId,
+    "prodId": SalesDetailUpdate.sadProdId,
+    "description": SalesDetailUpdate.sadProdDescription,
+    "price": SalesDetailUpdate.sadProdPrice,
+    "count": SalesDetailUpdate.sadProdCount,
+    "subTotal": SalesDetailUpdate.sadSubTotal,
+
+
+  }
   return currentSalesNote
 
 }

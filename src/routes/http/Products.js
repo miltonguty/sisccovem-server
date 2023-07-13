@@ -16,7 +16,8 @@ router.get('/Products', async function(req, res) {
 });
 router.post('/Products', async function(req, res) {
     try {
-        const result = await add(req, res);
+        const { description, priceSales, pricePurchase, image, supId } = req.body;
+        const result = await add({ description, priceSales, pricePurchase, image, supId });
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -26,7 +27,8 @@ router.post('/Products', async function(req, res) {
 });
 router.put('/Products', async function(req, res) {
     try {
-        const result = await update(req, res);
+        const { id, description, priceSales, pricePurchase, image, supId, stock } = req.body;
+        const result = await update({ id, description, priceSales, pricePurchase, image, supId, stock });
         res.status(200).json(result);
     } catch (err) {
         console.log(err)

@@ -1,4 +1,5 @@
 /*** CONTROLLER*/
+import { FALSE } from "../constants";
 import prisma from "../lib/prisma";
 import { GetCurrentUserId } from "../lib/utils";
 
@@ -10,14 +11,14 @@ export const get = async (req, res) => {
     where: {
       pudUseId: userId,
       pudPurId: null,
-      pudDeleted: false
+      pudDeleted: FALSE
     }
   }
 
   if (filter) {
     filterObject = {
       where: {
-        pudDeleted: false,
+        pudDeleted: FALSE,
         pudCounter: {
           contains: filter,
           pudUseId: userId,
@@ -103,7 +104,7 @@ const CreateUpdatePurchaseDetails = async (req, res) => {
   const userId = GetCurrentUserId()
   const { id, proId, count, } = req.body;
   const PurchasesDetail = await prisma.purchasesdetails.findFirst({
-    where: { pudProdId: proId, pudUseId: userId, pudDeleted: false },
+    where: { pudProdId: proId, pudUseId: userId, pudDeleted: FALSE },
   });
   const product = await prisma.Products.findFirst({
     where: { proId: proId },

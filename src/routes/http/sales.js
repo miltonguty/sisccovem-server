@@ -1,7 +1,7 @@
 import express, { json } from 'express';
-import { AddDetails, CloseNoteSales,  GetOrCreateNoteSales, RemoveDetails } from '../../controller/Sales.js';
+import { AddDetails, CloseNoteSales, GetOrCreateNoteSales, RemoveDetails, setClient } from '../../controller/Sales.js';
 var router = express.Router();
-router.get('/CurrenNoteSales', async function(req, res) {
+router.get('/sales/CurrenNote', async function(req, res) {
     try {
         const result = await GetOrCreateNoteSales(req, res);
         res.status(200).json(result);
@@ -11,9 +11,11 @@ router.get('/CurrenNoteSales', async function(req, res) {
     }
 
 });
-router.post('/Sales', async function(req, res) {
+
+router.post('/Sales/details', async function(req, res) {
     try {
-        const result = await AddDetails(req, res);
+        const { proId, count } = req.body
+        const result = await AddDetails(proId, count);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -21,9 +23,11 @@ router.post('/Sales', async function(req, res) {
     }
 
 });
-router.delete('/Sales', async function(req, res) {
+router.delete('/Sales/details/:desId', async function(req, res) {
     try {
-        const result = await RemoveDetails(req, res);
+
+        const { sadId } = req.params;
+        const result = await RemoveDetails(sadId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -31,7 +35,7 @@ router.delete('/Sales', async function(req, res) {
     }
 
 });
-router.put('/Sales', async function(req, res) {
+router.put('/Sales/CloseNoteSales', async function(req, res) {
     try {
         const result = await CloseNoteSales(req, res);
         res.status(200).json(result);
@@ -41,10 +45,21 @@ router.put('/Sales', async function(req, res) {
     }
 
 });
+router.put('/Sales/client', async function(req, res) {
+    try {
+        const { clientId } = req.body
+        const result = await setClient(clientId);
+        res.status(200).json(result);
+    } catch (err) {
+        console.log(err)
+        res.status(404).json({ error: err });
+    }
+
+});
 router.get('/Sales/:salId', async function(req, res) {
     try {
-        const result = await getById(req, res);
-        res.status(200).json(result);
+        //const result = await getById(req, res);
+        res.status(200).json(null);
     } catch (err) {
         console.log(err)
         res.status(404).json({ error: err });

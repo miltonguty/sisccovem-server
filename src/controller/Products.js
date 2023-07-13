@@ -1,4 +1,5 @@
 /*** CONTROLLER*/
+import { TRUE } from "../constants.js";
 import prisma from "../lib/prisma.js";
 import { GetEmpresaIdByUser } from "../lib/utils.js";
 export const get = async ({ description }) => {
@@ -19,12 +20,12 @@ export const get = async ({ description }) => {
         }
       })
   }
-  
+
   if (orConditions.length > 0) {
     filter.where.OR = orConditions
   }
 
- 
+
 
   const products = await prisma.products.findMany(filter);
   const result = products.map(item =>
@@ -34,7 +35,6 @@ export const get = async ({ description }) => {
     priceSales: item.proPriceSales,
     pricePurchase: item.proPricePurchase,
     image: item.proImage,
-    supId: item.proSupId,
     proId: item.proproId,
     stock: item.proStock,
   }))
@@ -58,7 +58,6 @@ export const getById = async (proId) => {
       priceSales: Product.proPriceSales,
       pricePurchase: Product.proPricePurchase,
       image: Product.proImage,
-      supId: Product.proSupId,
       stock: Product.proStock,
 
     }
@@ -66,16 +65,15 @@ export const getById = async (proId) => {
   return result;
 
 };
-export const add = async (req, res) => {
+export const add = async ({ description, priceSales, pricePurchase, image, supId }) => {
   const comId = GetEmpresaIdByUser()
-  const { description, priceSales, pricePurchase, image, supId } = req.body;
+
   const Product = await prisma.products.create({
     data: {
       proDescription: description,
       proPriceSales: Number(priceSales),
       proPricePurchase: Number(pricePurchase),
       proImage: image,
-      proSupId: Number(supId),
       proComId: Number(comId),
       proStock: 0
     },
@@ -83,9 +81,9 @@ export const add = async (req, res) => {
   return Product;
 
 };
-export const update = async (req, res) => {
+export const update = async ({ id, description, priceSales, pricePurchase, image, supId, stock }) => {
 
-  const { id, description, priceSales, pricePurchase, image, supId, stock } = req.body;
+ 
   const ProductUpdate = await prisma.products.update({
     where: { proId: id },
     data: {
@@ -93,7 +91,6 @@ export const update = async (req, res) => {
       proPriceSales: Number(priceSales),
       proPricePurchase: Number(pricePurchase),
       proImage: image,
-      proSupId: Number(supId),
       proStock: Number(stock)
     },
   });
@@ -105,7 +102,7 @@ export const remove = async (proId) => {
   const comId = GetEmpresaIdByUser()
   const ProductDelete = await prisma.products.update({
     where: { proId: Number(proId), proComId: Number(comId) },
-    data: { proDeleted: true }
+    data: { proDeleted: TRUE }
   });
   return ProductDelete;
 

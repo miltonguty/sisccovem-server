@@ -1,4 +1,5 @@
 /*** CONTROLLER*/
+import { FALSE, TRUE } from "../constants.js";
 import prisma from "../lib/prisma.js";
 import { GetEmpresaIdByUser } from "../lib/utils.js";
 export const
@@ -9,7 +10,7 @@ export const
       take: Number(pageSize),
       where: {
         cliComId: comId,
-        cliDeleted: 0
+        cliDeleted: FALSE
       }
     }
     const orConditions = []
@@ -120,9 +121,9 @@ export const remove = async (id) => {
   const comId = GetEmpresaIdByUser()
   const ClientDelete = await prisma.clients.update({
     where: {
-      cliId: Number(id)      
+      cliId: Number(id)
     }, data: {
-      cliDeleted: 1
+      cliDeleted: TRUE
     }
   });
   return ClientDelete;

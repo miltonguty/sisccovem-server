@@ -1,4 +1,5 @@
 /*** CONTROLLER*/
+import { TRUE } from "../constants.js";
 import prisma from "../lib/prisma.js";
 import { GetEmpresaIdByUser, GetCurrentUserId } from "../lib/utils.js";
 export const get = async (filter) => {
@@ -75,7 +76,7 @@ export const remove = async (purId) => {
 
   const PurchaseDelete = await prisma.purchases.update({
     where: { purId: purId },
-    data: { purDeleted: true },
+    data: { purDeleted: TRUE },
   });
 
   return PurchaseDelete
