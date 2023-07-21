@@ -4,8 +4,8 @@ import { SetFilterProduct } from '../../lib/Filters.js';
 var router = express.Router();
 router.get('/Products', async function(req, res) {
     try {
-        const { description } = req.params
-        const filter = SetFilterProduct({ description })
+
+        const filter = SetFilterProduct(req.query)
         const result = await get(filter);
         res.status(200).json(result);
     } catch (err) {

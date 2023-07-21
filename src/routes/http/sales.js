@@ -23,7 +23,7 @@ router.post('/Sales/details', async function(req, res) {
     }
 
 });
-router.delete('/Sales/details/:desId', async function(req, res) {
+router.delete('/Sales/details/:sadId', async function(req, res) {
     try {
 
         const { sadId } = req.params;

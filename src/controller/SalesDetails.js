@@ -1,135 +1,108 @@
 /*** CONTROLLER*/
-import { FALSE, TRUE } from "../constants";
-import prisma from "../lib/prisma";
-import { GetCurrentUserId } from "../lib/utils";
+import { FALSE, TRUE } from "../constants.js";
+import prisma from "../lib/prisma.js";
 
-export const get = async (req, res) => {
-  try {
-    const { filter } = req.query;
-    const userId = GetCurrentUserId()
-    let filterObject = {
-      where: {
-        sadUseId: userId,
-        sadSalId: null,
-        sadDeleted: FALSE,
+import { GetCurrentUserId } from "../lib/utils.js";
+import { GetCurrentNoteSalesByUser } from "./Sales.js";
+
+
+export const getById = async (sadKey) => {
+  if (sadKey) {
+
+
+    const SalesDetail = await prisma.salesdetails.findMany({
+      where: { sadKey: sadKey },
+      include: {
+        products: true
       }
-    }
-
-    if (filter) {
-      filterObject = {
-        where: {
-          sadDeleted: FALSE,
-          sadCounter: {
-            contains: filter,
-          },
-
-        }
-      }
-    };
-
-    const salesdetails = await prisma.salesdetails.findMany(filterObject);
-    const result = salesdetails.map(item =>
-    ({
-      id: item.sadId,
-      Counter: item.sadCounter,
-      ProdId: item.sadProdId,
-      Prodprice: item.sadProdprice,
-      ProdCount: item.sadProdCount,
-      ProdSubTotal: item.sadProdSubTotal,
-      ProdDescription: item.sadProdDescription
-
-    }))
-    res.status(200).json(result);
-  } catch (err) {
-    console.log(err)
-    res.status(404).json({ error: err });
-  }
-};
-
-export const getById = async (req, res) => {
-  try {
-    const { pudId } = req.query;
-    if (pudId) {
-      const SalesDetail = await prisma.salesdetails.findFirst({
-        where: { pudId: pudId },
-      });
-      const result = {
-        id: SalesDetail.sadId,
-        counter: SalesDetail.sadCounter,
-        proId: SalesDetail.sadProdId,
-        price: SalesDetail.sadProdprice,
-        count: SalesDetail.sadProdCount,
-        subTotal: SalesDetail.sadProdSubTotal,
-      }
-      res.status(200).json(result);
-
-    } else {
-      res.status(404).json({ error: "SalesDetail id not provide" });
-    }
-  } catch (err) {
-    console.log(err)
-    res.status(404).json({ error: err });
-  }
-};
-export const add = async (req, res) => {
-  try {
-    const SalesDetailCreated = await CreateUpdatesalesdetails(req, res)
-    res.status(200).json(SalesDetailCreated);
-  } catch (err) {
-    console.log(err)
-    res.status(404).json({ error: err });
-  }
-};
-export const update = async (req, res) => {
-  try {
-    const SalesDetailUpdate = await CreateUpdatesalesdetails(req, res)
-    res.status(200).json(SalesDetailUpdate);
-  } catch (err) {
-    console.log(err)
-    res.status(404).json({ error: err });
-  }
-};
-export const remove = async (req, res) => {
-  try {
-    const { sadId } = req.query;
-    const SalesDetailDelete = await prisma.salesdetails.update({
-      where: { sadId: sadId },
-      data: { sadDeleted: TRUE },
     });
-    res.status(200).json(SalesDetailDelete);
-  } catch (err) {
-    console.log(err)
-    res.status(404).json({ error: err });
+    if (SalesDetail.length >= 1) {
+      const result = {
+        id: SalesDetail[0].sadKey,
+        prodId: SalesDetail[0].products.proKey,
+        description: SalesDetail[0].products.proDescription,
+        price: SalesDetail[0].products.proPriceSales,
+        count: SalesDetail[0].sadProdCount,
+        subTotal: SalesDetail[0].sadSubTotal,
+      }
+      return result
+    } else {
+      return null
+    }
   }
-};
+}
+export const addUpdate = async (proKey, count) => {
 
-const CreateUpdatesalesdetails = async (req, res) => {
-  const { id, proId, count } = req.body;
+  const product = await prisma.products.findFirst({
+    where: { proKey: proKey },
+  });
+  let currentSalesNote = await GetCurrentNoteSalesByUser()
   const userId = GetCurrentUserId()
   const SalesDetail = await prisma.salesdetails.findFirst({
-    where: { sadProdId: proId, sadUseId: userId, sadDeleted: FALSE, sadSalId: null },
+    where: {
+      sadProdId: product.proId,
+      sadDeleted: FALSE,
+      sadSalId: currentSalesNote.id
+    },
   });
-  const product = await prisma.Products.findFirst({
-    where: { proId: proId },
+
+  await prisma.salesdetails.updateMany({
+    where: { sadSalId: currentSalesNote.id },
+    data: {
+      salLastItem: FALSE,
+    }
   });
   let SalesDetailUpdate = {}
   if (SalesDetail) {
     SalesDetailUpdate = await prisma.salesdetails.update({
       where: { sadId: SalesDetail.sadId },
-      data: { sadProdCount: Number(SalesDetail.sadProdCount) + Number(count) },
+      data: {
+        sadProdCount: Number(SalesDetail.sadProdCount) + Number(count),
+        sadSubTotal: (Number(product.proPriceSales) * (Number(SalesDetail.sadProdCount) + Number(count))),
+        salLastItem: TRUE
+      },
     });
 
   } else {
-
     SalesDetailUpdate = await prisma.salesdetails.create({
       data: {
-        sadProdId: Number(proId),
-        sadProdprice: Number(7),
+        sadProdId: Number(product.proId),
+        sadProdPrice: Number(product.proPriceSales),
         sadProdDescription: product.proDescription,
         sadProdCount: Number(count),
-        sadUseId: userId
+        sadUseId: Number(userId),
+        sadSalId: Number(currentSalesNote.id),
+        sadSubTotal: (Number(product.proPriceSales) * Number(count)),
+        salLastItem: TRUE
       },
     })
+  }
+
+  var detail = await getById(SalesDetailUpdate.sadKey)
+
+
+  return detail
+
+}
+export const remove = async (sadKey) => {
+  const SalesDetaiCount = await prisma.salesdetails.updateMany({
+    where: { sadKey: sadKey },
+    data: { sadDeleted: TRUE },
+  });
+  if (SalesDetaiCount.count >= 1) {
+    const SalesDetailDelete = await getById(sadKey)
+    const salesDetail = {
+      id: SalesDetailDelete.id,
+      prodId: SalesDetailDelete.prodId,
+      description: SalesDetailDelete.description,
+      price: SalesDetailDelete.price,
+      count: SalesDetailDelete.count,
+      subTotal: SalesDetailDelete.subTotal,
+
+    }
+    return salesDetail;
+  } else {
+    return null
   }
 
 }

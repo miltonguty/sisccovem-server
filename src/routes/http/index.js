@@ -4,7 +4,7 @@ import EmployeesRoute from './employees.js'
 import ProductsRoute from './products.js'
 import PurchasesRoute from './purchases.js'
 import ReportsRoute from './reports.js'
-import SuppliersRoute from './suppliers.js'
+import ProvidersRoute from './Providers.js'
 import salesRoute from './sales.js'
 
 export default {
@@ -14,7 +14,7 @@ export default {
     ProductsRoute,
     PurchasesRoute,
     ReportsRoute,
-    SuppliersRoute,
+    ProvidersRoute,
     salesRoute
 
 }

@@ -1,5 +1,5 @@
 /*** CONTROLLER*/
-import { FALSE } from "../constants.js";
+import { FALSE, TRUE } from "../constants.js";
 import prisma from "../lib/prisma.js";
 export const get = async ({ name, phone, address, pageSize, page }) => {
 
@@ -45,7 +45,7 @@ export const get = async ({ name, phone, address, pageSize, page }) => {
   const companys = await prisma.companys.findMany(filter);
   const result = companys.map(item =>
   ({
-    id: item.comId,
+    id: item.comKey,
     name: item.comName,
     phone: item.comPhone,
     address: item.comAddress
@@ -53,13 +53,13 @@ export const get = async ({ name, phone, address, pageSize, page }) => {
   return result;
 
 };
-export const getById = async (comId) => {
-  if (comId) {
+export const getById = async (comKey) => {
+  if (comKey) {
     const company = await prisma.companys.findFirst({
-      where: { comId: Number(comId) },
+      where: { comKey: Number(comKey) },
     });
     const result = {
-      id: company.comId,
+      id: company.comKey,
       name: company.comName,
       phone: company.comPhone,
       address: company.comAddress
@@ -80,18 +80,20 @@ export const add = async ({ name, phone, address }) => {
 };
 export const update = async ({ id, name, phone, address }) => {
 
-  const companyUpdate = await prisma.companys.update({
-    where: { comId: Number(id) },
+  const companyUpdate = await prisma.companys.updateMany({
+    where: { comKey: id },
     data: { comName: name, comPhone: phone, comAddress: address },
   });
   return companyUpdate
 
 };
-export const remove = async (id) => {
+export const remove = async (comKey) => {
 
 
-  const companyDelete = await prisma.companys.delete({
-    where: { comId: Number(id) },
+  const companyDelete = await prisma.companys.updateMany({
+    where: { comKey: comKey }, data: {
+      comDeleted: TRUE
+    }
   });
   return companyDelete
 

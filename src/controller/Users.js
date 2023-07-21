@@ -1,4 +1,5 @@
 /*** CONTROLLER*/
+import { TRUE } from "../constants.js";
 import prisma from "../lib/prisma.js";
 export const get = async (filter) => {
   let filterObject = {}
@@ -47,8 +48,8 @@ export const add = async ({ name, email, comId }) => {
 export const update = async ({ id, name, email, comId }) => {
 
   //const { id, name, email, comId } = req.body;
-  const userUpdate = await prisma.users.update({
-    where: { useId: id },
+  const userUpdate = await prisma.users.updateMany({
+    where: { useKey: id },
     data: { useName: name, useEmail: email, useComId: comId },
   });
   return userUpdate;
@@ -56,8 +57,8 @@ export const update = async ({ id, name, email, comId }) => {
 };
 export const remove = async (useId) => {
   //const { useId } = req.query;
-  const userDelete = await prisma.users.delete({
-    where: { useId: useId },
+  const userDelete = await prisma.users.updateMany({
+    where: { useId: useId }, data: { userDelete: TRUE }
   });
   return userDelete;
 

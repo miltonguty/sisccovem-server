@@ -1,0 +1,29 @@
+SELECT
+  salCliId,
+  salDate,
+  salTotal,
+  salLiteral,
+  salComId,
+  salClose,
+  salKey,
+  salUseId,
+  sadKey,
+  sadSubTotal,
+  salLastItem,
+  sadSalId,
+  sadUseId,
+  sadProdCount,
+  sadProdPrice,
+  sadProdDescription,
+  sadProdId,
+  sadDeleted,
+  cliPhone,
+  cliEmail,
+  cliLastName,
+  cliFirstName,
+  cliDeleted,
+  cliKey
+FROM
+  sales
+  JOIN salesdetails ON salId = sadSalId
+  JOIN clients ON salCliId = cliId;

@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
 }
 
 datasource db {
@@ -8,7 +9,7 @@ datasource db {
 }
 
 model clients {
-  cliId        Int       @id(map: "PK__clients__7F6E8DA931E2B7FF") @default(autoincrement())
+  cliId        Int       @default(autoincrement())
   cliCreatedAt DateTime  @default(now(), map: "DF__clients__cliCrea__4CA06362") @db.DateTime
   cliUpdatedAt DateTime? @db.DateTime
   cliDeleted   Int       @default(0, map: "DF__clients__cliDele__4BAC3F29") @db.TinyInt
@@ -17,8 +18,8 @@ model clients {
   cliEmail     String    @db.NVarChar(191)
   cliPhone     String    @db.NVarChar(191)
   cliComId     Int
+  cliKey       String    @id(map: "PK__clients__7F6E8DA931E2B7FF") @default(dbgenerated("newid()"), map: "DF__clients__cliKey__282DF8C2") @db.UniqueIdentifier
   companys     companys  @relation(fields: [cliComId], references: [comId], onUpdate: NoAction, map: "FK_clients_companys")
-  sales        sales[]
 }
 
 model companys {
@@ -29,10 +30,11 @@ model companys {
   comName      String      @db.NVarChar(191)
   comPhone     String?     @db.NVarChar(191)
   comAddress   String?     @db.NVarChar(191)
+  comKey       String      @default(dbgenerated("newid()"), map: "DF__companys__comKey__29221CFB") @db.UniqueIdentifier
   clients      clients[]
   employees    employees[]
   products     products[]
-  suppliers    suppliers[]
+  providers    providers[]
   users        users[]
 }
 
@@ -47,6 +49,7 @@ model employees {
   empPhone     String    @db.NVarChar(191)
   empSalary    Float     @default(0, map: "DF__employees__empSa__5535A963")
   empComId     Int
+  empKey       String    @default(dbgenerated("newid()"), map: "DF__employees__empKe__2A164134") @db.UniqueIdentifier
   companys     companys  @relation(fields: [empComId], references: [comId], onUpdate: NoAction, map: "FK_employees_companys")
 }
 
@@ -61,9 +64,32 @@ model products {
   proImage         String?            @db.NVarChar(191)
   proComId         Int
   proStock         Float              @default(0, map: "DF__products__proSto__5BE2A6F2")
+  proKey           String             @default(dbgenerated("newid()"), map: "DF__products__proKey__2B0A656D") @db.UniqueIdentifier
   companys         companys           @relation(fields: [proComId], references: [comId], onUpdate: NoAction, map: "FK_products_companys")
   purchasesdetails purchasesdetails[]
   salesdetails     salesdetails[]
+}
+
+model productxsupliers {
+  pxsId    Int    @id(map: "PK_productsupliers") @default(autoincrement())
+  pxsProId Int?
+  pxsSupId Int?
+  pxsKey   String @default(dbgenerated("newid()"), map: "DF__productxs__pxsKe__2BFE89A6") @db.UniqueIdentifier
+}
+
+model providers {
+  prvId        Int         @id(map: "PK__supplier__B4F221B29C214A40") @default(autoincrement())
+  prvCreatedAt DateTime    @default(now(), map: "DF__suppliers__supCr__778AC167") @db.DateTime
+  prvUpdatedAt DateTime?   @db.DateTime
+  prvDeleted   Int         @default(0, map: "DF__suppliers__supDe__797309D9") @db.TinyInt
+  prvName      String      @db.NVarChar(191)
+  prvPhone     String?     @db.NVarChar(191)
+  prvAddress   String?     @db.NVarChar(191)
+  prvImage     String?     @db.NVarChar(191)
+  prvComId     Int
+  prvKey       String      @default(dbgenerated("newid()"), map: "DF__suppliers__supKe__30C33EC3") @db.UniqueIdentifier
+  companys     companys    @relation(fields: [prvComId], references: [comId], onUpdate: NoAction, map: "FK_suppliers_companys")
+  purchases    purchases[]
 }
 
 model purchases {
@@ -76,8 +102,9 @@ model purchases {
   purComId         Int
   purClose         Int                @default(0, map: "DF__purchases__purCl__5535A963") @db.TinyInt
   purUseId         Int?
-  pursupId         Int?
-  suppliers        suppliers?         @relation(fields: [pursupId], references: [supId], onDelete: NoAction, onUpdate: NoAction, map: "FK_purchases_suppliers")
+  purPrvId         Int?
+  purKey           String             @default(dbgenerated("newid()"), map: "DF__purchases__purKe__2CF2ADDF") @db.UniqueIdentifier
+  providers        providers?         @relation(fields: [purPrvId], references: [prvId], onDelete: NoAction, onUpdate: NoAction, map: "FK_purchases_suppliers")
   purchasesdetails purchasesdetails[]
 }
 
@@ -95,6 +122,7 @@ model purchasesdetails {
   pudProdPrice       Float     @default(0, map: "DF__purchases__pudPr__5DCAEF64")
   pudLastItem        Int       @default(0, map: "DF__purchases__pudLa__5EBF139D") @db.TinyInt
   pudSubTotal        Float     @default(0.00, map: "DF__purchases__pudSu__1BC821DD")
+  pudKey             String    @default(dbgenerated("newid()"), map: "DF__purchases__pudKe__2DE6D218") @db.UniqueIdentifier
   products           products  @relation(fields: [pudProdId], references: [proId], onUpdate: NoAction, map: "FK_purchasesdetails_products")
   purchases          purchases @relation(fields: [pudPurId], references: [purId], onUpdate: NoAction, map: "FK_purchasesdetails_purchases")
 }
@@ -111,7 +139,7 @@ model sales {
   salCliId     Int
   salClose     Int            @default(0, map: "DF__sales__salClose__6EF57B66") @db.TinyInt
   salUseId     Int?
-  clients      clients        @relation(fields: [salCliId], references: [cliId], onUpdate: NoAction, map: "FK_sales_clients")
+  salKey       String         @default(dbgenerated("newid()"), map: "DF__sales__salKey__2EDAF651") @db.UniqueIdentifier
   salesdetails salesdetails[]
 }
 
@@ -128,22 +156,9 @@ model salesdetails {
   sadSalId           Int
   salLastItem        Int       @default(0, map: "DF__salesdeta__salLa__6FE99F9F") @db.TinyInt
   sadSubTotal        Float     @default(0.00, map: "DF__salesdeta__sadSu__1CBC4616")
+  sadKey             String    @default(dbgenerated("newid()"), map: "DF__salesdeta__sadKe__2FCF1A8A") @db.UniqueIdentifier
   products           products  @relation(fields: [sadProdId], references: [proId], onUpdate: NoAction, map: "FK_salesdetails_products")
   sales              sales     @relation(fields: [sadSalId], references: [salId], onUpdate: NoAction, map: "FK_salesdetails_sales")
-}
-
-model suppliers {
-  supId        Int         @id(map: "PK__supplier__B4F221B29C214A40") @default(autoincrement())
-  supCreatedAt DateTime    @default(now(), map: "DF__suppliers__supCr__778AC167") @db.DateTime
-  supUpdatedAt DateTime?   @db.DateTime
-  supDeleted   Int         @default(0, map: "DF__suppliers__supDe__797309D9") @db.TinyInt
-  supName      String      @db.NVarChar(191)
-  supPhone     String?     @db.NVarChar(191)
-  supAddress   String?     @db.NVarChar(191)
-  supImage     String?     @db.NVarChar(191)
-  supComId     Int
-  purchases    purchases[]
-  companys     companys    @relation(fields: [supComId], references: [comId], onUpdate: NoAction, map: "FK_suppliers_companys")
 }
 
 model sysdiagrams {
@@ -165,14 +180,21 @@ model users {
   usePassword  String    @db.NVarChar(191)
   useEmail     String    @db.NVarChar(191)
   useComId     Int
+  useKey       String    @default(dbgenerated("newid()"), map: "DF__users__useKey__31B762FC") @db.UniqueIdentifier
   companys     companys  @relation(fields: [useComId], references: [comId], onUpdate: NoAction, map: "FK_users_companys")
 }
 
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-model productsupliers {
-  id    Int  @id(map: "PK_productsupliers") @default(autoincrement())
-  proId Int?
-  supId Int?
-
-  @@ignore
+view viewsalesdetails {
+  sadId              Int    @unique
+  sadKey             String @db.UniqueIdentifier
+  sadSubTotal        Float
+  salLastItem        Int    @db.TinyInt
+  sadSalId           Int
+  sadUseId           Int
+  sadProdCount       Float
+  sadProdPrice       Float
+  sadProdDescription String @db.NVarChar(191)
+  sadProdId          Int
+  proKey             String @db.UniqueIdentifier
+  sadDeleted         Int    @db.TinyInt
 }

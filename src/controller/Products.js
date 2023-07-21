@@ -5,7 +5,7 @@ import { GetEmpresaIdByUser } from "../lib/utils.js";
 export const get = async ({ description }) => {
 
 
-  const comId = GetEmpresaIdByUser()
+  const comId =GetEmpresaIdByUser()
   let filter = {
     where: {
       proComId: Number(comId)
@@ -30,7 +30,7 @@ export const get = async ({ description }) => {
   const products = await prisma.products.findMany(filter);
   const result = products.map(item =>
   ({
-    id: item.proId,
+    id: item.proKey,
     description: item.proDescription,
     priceSales: item.proPriceSales,
     pricePurchase: item.proPricePurchase,
@@ -41,19 +41,19 @@ export const get = async ({ description }) => {
   return result
 
 };
-export const getById = async (proId) => {
+export const getById = async (proKey) => {
 
   const comId = GetEmpresaIdByUser()
   let result = null
-  if (proId) {
+  if (proKey) {
     const Product = await prisma.products.findFirst({
       where: {
-        proId: proId,
+        proKey: proKey,
         proComId: Number(comId)
       },
     });
     result = {
-      id: Product.proId,
+      id: Product.proKey,
       description: Product.proDescription,
       priceSales: Product.proPriceSales,
       pricePurchase: Product.proPricePurchase,
@@ -83,9 +83,9 @@ export const add = async ({ description, priceSales, pricePurchase, image, supId
 };
 export const update = async ({ id, description, priceSales, pricePurchase, image, supId, stock }) => {
 
- 
-  const ProductUpdate = await prisma.products.update({
-    where: { proId: id },
+
+  const ProductUpdate = await prisma.products.updateMany({
+    where: { proKey: id },
     data: {
       proDescription: description,
       proPriceSales: Number(priceSales),
@@ -97,11 +97,11 @@ export const update = async ({ id, description, priceSales, pricePurchase, image
   return ProductUpdate;
 
 };
-export const remove = async (proId) => {
+export const remove = async (proKey) => {
 
   const comId = GetEmpresaIdByUser()
-  const ProductDelete = await prisma.products.update({
-    where: { proId: Number(proId), proComId: Number(comId) },
+  const ProductDelete = await prisma.products.updateMany({
+    where: { proKey: proKey, proComId: Number(comId) },
     data: { proDeleted: TRUE }
   });
   return ProductDelete;

@@ -33,7 +33,7 @@ export function SetFilterProduct ({ page, pageSize, description, priceSales, pri
     }
     return filter
 }
-export function SetFilterSuppliers ({ page, pageSize, name, phone, address }) {
+export function SetFilterProviders ({ page, pageSize, name, phone, address }) {
 
     const filter = {
         page: page ? page - 1 : 0,

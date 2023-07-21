@@ -49,7 +49,8 @@ router.get('/companys/:comId', async function(req, res) {
 });
 router.delete('/companys/:comId', async function(req, res) {
     try {
-        const result = await remove(req, res);
+        const { comId } = req.params
+        const result = await remove(comId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)

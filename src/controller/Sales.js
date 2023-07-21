@@ -3,9 +3,10 @@ import { FALSE, TRUE } from "../constants.js";
 import createPdf from "../lib/PdfFiles.js";
 import prisma from "../lib/prisma.js";
 import { GetEmpresaIdByUser, GetCurrentUserId } from "../lib/utils.js";
+import { addUpdate, remove as removeDetailbyId } from "./SalesDetails.js";
 export const NOTE_SALES_CLOSE = 1;
 export const NOTE_SALES_OPEN = 0;
-const GetCurrentNoteSalesByUser = async () => {
+export const GetCurrentNoteSalesByUser = async () => {
   const userId = GetCurrentUserId()
   const currentSales = await prisma.sales.findMany({
     where: {
@@ -14,7 +15,11 @@ const GetCurrentNoteSalesByUser = async () => {
       salUseId: Number(userId),
     },
     include: {
-      salesdetails: true,
+      salesdetails: {
+        include: {
+          products: true
+        }
+      },
     },
   })
   let currentSalesNote = null
@@ -29,15 +34,15 @@ const GetCurrentNoteSalesByUser = async () => {
       client: {
         firstName: client.cliFirstName,
         lastName: client.cliLastName,
-        id: client.cliId
+        id: client.cliKey
       },
       salesdetails: []
     }
     currentSale.salesdetails.map(detail => {
       if (!detail.sadDeleted) {
         currentSalesNote.salesdetails.push({
-          id: detail.sadId,
-          prodId: detail.sadProdId,
+          id: detail.sadKey,
+          prodId: detail.products.proKey,
           description: detail.sadProdDescription,
           price: detail.sadProdPrice,
           count: detail.sadProdCount,
@@ -127,29 +132,15 @@ export const GetOrCreateNoteSales = async (req, res) => {
 
 
 }
-export const AddDetails = async (proId, count) => {
+export const AddDetails = async (proKey, count) => {
 
-  const salesCreated = await CreateUpdateSalesDetails(proId, count)
+  const salesCreated = await addUpdate(proKey, count)
   return salesCreated;
 
 }
-export const RemoveDetails = async (sadId) => {
-
-  let currentSalesNote = await GetCurrentNoteSalesByUser()
-  const SalesDetailDelete = await prisma.salesdetails.update({
-    where: { sadId: sadId, sadSalId: currentSalesNote.salId },
-    data: { sadDeleted: TRUE },
-  });
-  const salesDetail = {
-    id: SalesDetailDelete.sadId,
-    prodId: SalesDetailDelete.sadProdId,
-    price: SalesDetailDelete.sadProdPrice,
-    count: SalesDetailDelete.sadProdCount,
-    subTotal: SalesDetailDelete.sadSubTotal,
-    description: SalesDetailDelete.sadProdDescription
-  }
-  currentSalesNote = await GetCurrentNoteSalesByUser()
-  return currentSalesNote;
+export const RemoveDetails = async (sadKey) => {
+  const SalesDetail = await removeDetailbyId(sadKey)
+  return SalesDetail
 
 };
 
@@ -170,71 +161,18 @@ export const CloseNoteSales = async (req, res) => {
 };
 export const setClient = async (clientId) => {
   let currentSalesNote = await GetCurrentNoteSalesByUser()
+  const client = await prisma.clients.findFirst({ where: { cliKey: clientId } })
   const sales = await prisma.sales.update({
     where: { salId: currentSalesNote.id },
     data: {
-      salCliId: Number(clientId)
+      salCliId: Number(client.cliId)
     }
   })
-  const client = await prisma.clients.findFirst({ where: { cliId: clientId } })
+
 
   return {
-    id: client.id,
+    id: client.cliKey,
     firstName: client.cliFirstName,
     lastName: client.cliLastName
   }
-}
-const CreateUpdateSalesDetails = async (proId, count) => {
-
-
-  let currentSalesNote = await GetCurrentNoteSalesByUser()
-  const userId = GetCurrentUserId()
-  const SalesDetail = await prisma.salesdetails.findFirst({
-    where: { sadProdId: Number(proId), sadDeleted: FALSE, sadSalId: currentSalesNote.id },
-  });
-  const product = await prisma.products.findFirst({
-    where: { proId: proId },
-  });
-  await prisma.salesdetails.updateMany({
-    where: { sadSalId: currentSalesNote.id },
-    data: {
-      salLastItem: FALSE,
-    }
-  });
-  let SalesDetailUpdate = {}
-  if (SalesDetail) {
-    SalesDetailUpdate = await prisma.salesdetails.update({
-      where: { sadId: SalesDetail.sadId },
-      data: { sadProdCount: Number(SalesDetail.sadProdCount) + Number(count), sadSubTotal: (Number(product.proPriceSales) * (Number(SalesDetail.sadProdCount) + Number(count))), salLastItem: TRUE },
-    });
-
-  } else {
-    SalesDetailUpdate = await prisma.salesdetails.create({
-      data: {
-        sadProdId: Number(proId),
-        sadProdPrice: Number(product.proPriceSales),
-        sadProdDescription: product.proDescription,
-        sadProdCount: Number(count),
-        sadUseId: Number(userId),
-        sadSalId: Number(currentSalesNote.id),
-        sadSubTotal: (Number(product.proPriceSales) * Number(count)),
-        salLastItem: TRUE
-      },
-    })
-  }
-
-
-
-  currentSalesNote = {
-    "id": SalesDetailUpdate.sadId,
-    "prodId": SalesDetailUpdate.sadProdId,
-    "description": SalesDetailUpdate.sadProdDescription,
-    "price": SalesDetailUpdate.sadProdPrice,
-    "count": SalesDetailUpdate.sadProdCount,
-    "subTotal": SalesDetailUpdate.sadSubTotal,
-
-
-  }
-  return currentSalesNote
-
 }

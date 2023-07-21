@@ -5,7 +5,7 @@ export const appHttp = (app) => {
 
     app.use(express.static('public'));
     app.use(bodyParser.json())
-   
+
 
     app.get('/', async (req, res) => {
         res.json({ status: true, message: "**********************SISCCOVEM*************************" })
@@ -19,7 +19,7 @@ export const appHttp = (app) => {
     app.use('/api/', routes.ProductsRoute);
     app.use('/api/', routes.PurchasesRoute);
     app.use('/api/', routes.ReportsRoute);
-    app.use('/api/', routes.SuppliersRoute);
+    app.use('/api/', routes.ProvidersRoute);
     app.use('/api/', routes.salesRoute);
 
 

@@ -1,4 +1,5 @@
 /*** CONTROLLER*/
+import { FALSE, TRUE } from "../constants.js";
 import prisma from "../lib/prisma.js";
 import { GetEmpresaIdByUser } from "../lib/utils.js";
 export const get = async ({ firstName, lastName, email, phone, pageSize, page }) => {
@@ -56,7 +57,7 @@ export const get = async ({ firstName, lastName, email, phone, pageSize, page })
   const employees = await prisma.employees.findMany(filter);
   const result = employees.map(item =>
   ({
-    id: item.empId,
+    id: item.empKey,
     firstName: item.empFirstName,
     lastName: item.empLastName,
     email: item.empEmail,
@@ -73,12 +74,12 @@ export const getById = async (empId) => {
     const comId = GetEmpresaIdByUser()
     const Employee = await prisma.employees.findFirst({
       where: {
-        empId: Number(empId),
+        empKey: empId,
         empComId: comId
       },
     });
     result = {
-      id: Employee.empId,
+      id: Employee.empKey,
       firstName: Employee.empFirstName,
       lastName: Employee.empLastName,
       email: Employee.empEmail,
@@ -105,8 +106,8 @@ export const add = async ({ firstName, lastName, email, phone, salary }) => {
 };
 export const update = async ({ id, firstName, lastName, email, phone, salary }) => {
 
-  const EmployeeUpdate = await prisma.employees.update({
-    where: { empId: Number(id) },
+  const EmployeeUpdate = await prisma.employees.updateMany({
+    where: { empKey: id },
     data: {
       empFirstName: firstName, empLastName: lastName, empEmail: email,
       empPhone: phone, empSalary: Number(salary)
@@ -115,10 +116,11 @@ export const update = async ({ id, firstName, lastName, email, phone, salary }) 
   return EmployeeUpdate;
 
 };
-export const remove = async (req, res) => {
-  const { empId } = req.query;
-  const EmployeeDelete = await prisma.employees.delete({
-    where: { empId: Number(empId) },
+export const remove = async (empKey) => {
+  const EmployeeDelete = await prisma.employees.updateMany({
+    where: { empKey: empId }, data: {
+      empDeleted: TRUE
+    }
   });
   return EmployeeDelete;
 
