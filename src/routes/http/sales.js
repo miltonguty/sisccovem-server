@@ -1,5 +1,5 @@
 import express, { json } from 'express';
-import { AddDetails, CloseNoteSales, GetOrCreateNoteSales, RemoveDetails, setClient } from '../../controller/Sales.js';
+import { AddDetails, CloseNoteSales, CreateNoteSales, GetOrCreateNoteSales, RemoveDetails, setClient } from '../../controller/Sales.js';
 var router = express.Router();
 router.get('/sales/CurrenNote', async function(req, res) {
     try {
@@ -66,5 +66,25 @@ router.get('/Sales/:salId', async function(req, res) {
     }
 
 });
+router.post('/Sales/CurrenNote', async function(req, res) {
+    try {
+        const { clientId } = req.body
+        const result = await CreateNoteSales(clientId)
+        res.status(200).json(result);
+    } catch (err) {
+        console.log(err)
+        res.status(404).json({ error: err });
+    }
 
+});
+router.put('/Sales/CurrenNote', async function(req, res) {
+    try {
+        await CloseNoteSales()
+        res.status(200).json(null);
+    } catch (err) {
+        console.log(err)
+        res.status(404).json({ error: err });
+    }
+
+});
 export default router;

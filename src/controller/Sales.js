@@ -3,32 +3,26 @@ import { FALSE, TRUE } from "../constants.js";
 import createPdf from "../lib/PdfFiles.js";
 import prisma from "../lib/prisma.js";
 import { GetEmpresaIdByUser, GetCurrentUserId } from "../lib/utils.js";
+import { getById } from "./Clients.js";
 import { addUpdate, remove as removeDetailbyId } from "./SalesDetails.js";
 export const NOTE_SALES_CLOSE = 1;
 export const NOTE_SALES_OPEN = 0;
-export const GetCurrentNoteSalesByUser = async () => {
-  const userId = GetCurrentUserId()
-  const currentSales = await prisma.sales.findMany({
-    where: {
-      salDeleted: FALSE,
-      salClose: NOTE_SALES_OPEN,
-      salUseId: Number(userId),
-    },
-    include: {
+export const GetSalesById = async (salId) => {
+  const currentSale = await prisma.sales.findFirst({
+    where: { salId: salId }, include: {
       salesdetails: {
         include: {
           products: true
         }
       },
     },
-  })
-  let currentSalesNote = null
-  if (currentSales.length >= 1) {
-    const currentSale = currentSales[0]
+
+  }
+  )
+  let salesNote = null
+  if (currentSale != null) {
     const client = await prisma.clients.findFirst({ where: { cliId: currentSale.salCliId } })
-
-
-    currentSalesNote = {
+    salesNote = {
       id: currentSale.salId,
       total: currentSale.salTotal,
       client: {
@@ -40,7 +34,7 @@ export const GetCurrentNoteSalesByUser = async () => {
     }
     currentSale.salesdetails.map(detail => {
       if (!detail.sadDeleted) {
-        currentSalesNote.salesdetails.push({
+        salesNote.salesdetails.push({
           id: detail.sadKey,
           prodId: detail.products.proKey,
           description: detail.sadProdDescription,
@@ -52,8 +46,26 @@ export const GetCurrentNoteSalesByUser = async () => {
         )
       }
     })
+    return salesNote;
   }
-  return currentSalesNote;
+  return null
+}
+export const GetCurrentNoteSalesByUser = async () => {
+  const userId = GetCurrentUserId()
+  const currentSales = await prisma.sales.findMany({
+    where: {
+      salDeleted: FALSE,
+      salClose: NOTE_SALES_OPEN,
+      salUseId: Number(userId),
+    }
+  })
+  let noteSales = null
+  if (currentSales.length > 0) {
+    noteSales = await GetSalesById(currentSales[0].salId)
+  }
+
+
+  return noteSales;
 }
 /*
 export const Get = async (req, res) =>
@@ -116,18 +128,26 @@ export const GetById = async (req, res) =>
     res.status(404).json({ error: err });
   }
 };*/
+export const CreateNoteSales = async (clikey) => {
+  const userId = GetCurrentUserId()
+  const ComId = GetEmpresaIdByUser(userId)
+  const client = await prisma.clients.findFirst({
+    where: { cliKey: clikey }
+  })
+  if (client != null) {
+    const sales = await prisma.sales.create({
+      data: { salComId: Number(ComId), salUseId: Number(userId), salLiteral: "cero", salCliId: Number(client.cliId) },
+    });
+    return await GetCurrentNoteSalesByUser()
+  } else {
+    return null
+  }
+
+}
 export const GetOrCreateNoteSales = async (req, res) => {
 
   let currentSalesNote = await GetCurrentNoteSalesByUser()
-  if (currentSalesNote == null) {
-    const userId = GetCurrentUserId()
-    const ComId = GetEmpresaIdByUser(userId)
-    const { cliId } = req.body;
-    const sales = await prisma.sales.create({
-      data: { salComId: Number(ComId), salUseId: Number(userId), salLiteral: "cero", salCliId: Number(1) },
-    });
-    currentSalesNote = await GetCurrentNoteSalesByUser()
-  }
+
   return { ...currentSalesNote };
 
 
@@ -144,19 +164,19 @@ export const RemoveDetails = async (sadKey) => {
 
 };
 
-export const CloseNoteSales = async (req, res) => {
+export const CloseNoteSales = async () => {
   const currentSalesNote = await GetCurrentNoteSalesByUser()
 
   const SaleUpdate = await prisma.sales.update({
     where: { salId: currentSalesNote.id },
-    data: { salClose: NOTE_SALES_CLOSE },
-    include: {
-      salesdetails: true,
-    },
+    data: { salClose: NOTE_SALES_CLOSE }
   });
+  await prisma.sales.GetSalesById(currentSalesNote.id)
+  return
+  /*
   const file = await createPdf('NotedeVenta', 'output', SaleUpdate)
   res.sendFile("D:\DEV\sisccovem2\sisccovem-server\public\tmp\\output.pdf",)
-  return { note: SaleUpdate, pathFile: file };
+  return { note: SaleUpdate, pathFile: file };*/
 
 };
 export const setClient = async (clientId) => {
