@@ -38,9 +38,9 @@ export const GetSalesById = async (salId) => {
           id: detail.sadKey,
           prodId: detail.products.proKey,
           description: detail.sadProdDescription,
-          price: detail.sadProdPrice,
-          count: detail.sadProdCount,
-          subTotal: detail.sadSubTotal,
+          price: (Number(detail.sadProdPrice)).toFixed(2),
+          count: (Number(detail.sadProdCount)).toFixed(2),
+          subTotal: (Number(detail.sadSubTotal)).toFixed(2),
 
         }
         )
