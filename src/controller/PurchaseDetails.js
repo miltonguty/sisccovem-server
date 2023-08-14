@@ -48,6 +48,8 @@ export const getById = async (req, res) => {
   const { pudId } = req.query;
   let result = null
   if (pudId) {
+
+
     const PurchasesDetail = await prisma.purchasesdetails.findFirst({
       where: { pudId: pudId },
     });
@@ -92,7 +94,7 @@ export const updatePriceCount = async (req, res) => {
 };
 export const remove = async (req, res) => {
   const { pudId } = req.query;
-  console.log(pudId)
+
   const PurchasesDetailDelete = await prisma.purchasesdetails.delete({
     where: { pudId: pudId },
   });

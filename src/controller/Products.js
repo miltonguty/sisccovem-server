@@ -1,11 +1,11 @@
 /*** CONTROLLER*/
-import { TRUE } from "../constants.js";
+import { FALSE, TRUE } from "../constants.js";
 import prisma from "../lib/prisma.js";
 import { GetEmpresaIdByUser } from "../lib/utils.js";
 export const get = async ({ description }) => {
 
 
-  const comId =GetEmpresaIdByUser()
+  const comId = GetEmpresaIdByUser()
   let filter = {
     where: {
       proComId: Number(comId)
@@ -41,16 +41,26 @@ export const get = async ({ description }) => {
   return result
 
 };
-export const getById = async (proKey) => {
+export const getById = async (key, ignoreDeleted = FALSE) => {
 
   const comId = GetEmpresaIdByUser()
   let result = null
-  if (proKey) {
+  if (key) {
+    let where = {}
+    if (ignoreDeleted) {
+      where = {
+        proKey: key,
+        proComId: comId
+      }
+    } else {
+      where = {
+        proKey: key,
+        proComId: comId,
+        proDeleted: FALSE
+      }
+    }
     const Product = await prisma.products.findFirst({
-      where: {
-        proKey: proKey,
-        proComId: Number(comId)
-      },
+      where: where
     });
     result = {
       id: Product.proKey,
@@ -78,7 +88,8 @@ export const add = async ({ description, priceSales, pricePurchase, image, supId
       proStock: 0
     },
   });
-  return Product;
+  const productResult = await getById(Product.proKey)
+  return productResult;
 
 };
 export const update = async ({ id, description, priceSales, pricePurchase, image, supId, stock }) => {
@@ -94,7 +105,8 @@ export const update = async ({ id, description, priceSales, pricePurchase, image
       proStock: Number(stock)
     },
   });
-  return ProductUpdate;
+  const productResult = await getById(ProductUpdate.proKey)
+  return productResult
 
 };
 export const remove = async (proKey) => {
@@ -104,6 +116,7 @@ export const remove = async (proKey) => {
     where: { proKey: proKey, proComId: Number(comId) },
     data: { proDeleted: TRUE }
   });
-  return ProductDelete;
+  const productResult = await getById(proKey, TRUE)
+  return productResult;
 
 };

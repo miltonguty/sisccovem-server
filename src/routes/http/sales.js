@@ -1,5 +1,5 @@
 import express, { json } from 'express';
-import { AddDetails, CloseNoteSales, CreateNoteSales, GetOrCreateNoteSales, RemoveDetails, setClient } from '../../controller/Sales.js';
+import { AddDetails, CloseNoteSales, CreateNoteSales, GetOrCreateNoteSales, RemoveDetails, saveDescount, setClient } from '../../controller/Sales.js';
 var router = express.Router();
 router.get('/sales/CurrenNote', async function(req, res) {
     try {
@@ -81,6 +81,17 @@ router.put('/Sales/CurrenNote', async function(req, res) {
     try {
         await CloseNoteSales()
         res.status(200).json(null);
+    } catch (err) {
+        console.log(err)
+        res.status(404).json({ error: err });
+    }
+
+});
+router.put('/Sales/saveDescount', async function(req, res) {
+    try {
+        const { percentage } = req.body
+        const result = await saveDescount(percentage)
+        res.status(200).json(result);
     } catch (err) {
         console.log(err)
         res.status(404).json({ error: err });

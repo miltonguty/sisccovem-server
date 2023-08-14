@@ -7,6 +7,18 @@ import { getById } from "./Clients.js";
 import { addUpdate, remove as removeDetailbyId } from "./SalesDetails.js";
 export const NOTE_SALES_CLOSE = 1;
 export const NOTE_SALES_OPEN = 0;
+const GetCurrentSales = async () => {
+  const userId = GetCurrentUserId()
+  const currentSales = await prisma.sales.findMany({
+    where: {
+      salDeleted: FALSE,
+      salClose: NOTE_SALES_OPEN,
+      salUseId: Number(userId),
+    }
+  })
+  return currentSales[0]
+
+}
 export const GetSalesById = async (salId) => {
   const currentSale = await prisma.sales.findFirst({
     where: { salId: salId }, include: {
@@ -24,7 +36,10 @@ export const GetSalesById = async (salId) => {
     const client = await prisma.clients.findFirst({ where: { cliId: currentSale.salCliId } })
     salesNote = {
       id: currentSale.salId,
-      total: currentSale.salTotal,
+      total: (Number(currentSale.salTotal)).toFixed(2),
+      descuento: currentSale.salDescuento,
+      totalWithDesc: (Number(currentSale.salTotalWithDesc)).toFixed(2),
+      totalDesc: (Number(currentSale.salTotalDesc)).toFixed(2),
       client: {
         firstName: client.cliFirstName,
         lastName: client.cliLastName,
@@ -52,16 +67,10 @@ export const GetSalesById = async (salId) => {
 }
 export const GetCurrentNoteSalesByUser = async () => {
   const userId = GetCurrentUserId()
-  const currentSales = await prisma.sales.findMany({
-    where: {
-      salDeleted: FALSE,
-      salClose: NOTE_SALES_OPEN,
-      salUseId: Number(userId),
-    }
-  })
+  const currentSales = await GetCurrentSales()
   let noteSales = null
-  if (currentSales.length > 0) {
-    noteSales = await GetSalesById(currentSales[0].salId)
+  if (currentSales) {
+    noteSales = await GetSalesById(currentSales.salId)
   }
 
 
@@ -135,8 +144,20 @@ export const CreateNoteSales = async (clikey) => {
     where: { cliKey: clikey }
   })
   if (client != null) {
+    const literal = "cero"
+    /*const rawSQL = `call inserSales(${ Number(ComId) },${ Number(userId) }, "${ literal }",${ Number(client.cliId) })`;
+    const result = await prisma.$executeRaw (rawSQL)*/
+
     const sales = await prisma.sales.create({
-      data: { salComId: Number(ComId), salUseId: Number(userId), salLiteral: "cero", salCliId: Number(client.cliId) },
+      data: {
+        salComId: Number(ComId),
+        salUseId: Number(userId),
+        salDescuento: Number(0),
+        salTotalDesc: 0,
+        salTotalWithDesc: 0,
+        salLiteral: "cero",
+        salCliId: Number(client.cliId)
+      },
     });
     return await GetCurrentNoteSalesByUser()
   } else {
@@ -153,10 +174,8 @@ export const GetOrCreateNoteSales = async (req, res) => {
 
 }
 export const AddDetails = async (proKey, count) => {
-
   const salesCreated = await addUpdate(proKey, count)
-  return salesCreated;
-
+  return GetCurrentNoteSalesByUser();
 }
 export const RemoveDetails = async (sadKey) => {
   const SalesDetail = await removeDetailbyId(sadKey)
@@ -171,8 +190,8 @@ export const CloseNoteSales = async () => {
     where: { salId: currentSalesNote.id },
     data: { salClose: NOTE_SALES_CLOSE }
   });
-  await prisma.sales.GetSalesById(currentSalesNote.id)
-  return
+  return await GetSalesById(currentSalesNote.id)
+
   /*
   const file = await createPdf('NotedeVenta', 'output', SaleUpdate)
   res.sendFile("D:\DEV\sisccovem2\sisccovem-server\public\tmp\\output.pdf",)
@@ -195,4 +214,27 @@ export const setClient = async (clientId) => {
     firstName: client.cliFirstName,
     lastName: client.cliLastName
   }
+}
+export const saveDescount = async (percentage = 0) => {
+  const userId = GetCurrentUserId()
+  const currentSale = await GetCurrentSales()
+  const currentSales = await prisma.sales.update({
+    where: {
+      salId: currentSale.salId,
+    }, data: {
+      salDescuento: Number(percentage)
+    }
+  })
+  let noteSales = null
+  if (currentSales) {
+    noteSales = {
+      id: currentSales.salId,
+      total: (Number(currentSales.salTotal)).toFixed(2),
+      descuento: currentSales.salDescuento,
+      totalWithDesc: (Number(currentSales.salTotalWithDesc)).toFixed(2),
+      totalDesc: (Number(currentSales.salTotalDesc)).toFixed(2)
+
+    }
+  }
+  return noteSales
 }

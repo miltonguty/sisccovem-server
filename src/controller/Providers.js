@@ -44,7 +44,7 @@ export const get = async ({ name, phone, address, pageSize, page }) => {
   const providers = await prisma.providers.findMany(filter);
   const result = providers.map(item =>
   ({
-    id: item.prvId,
+    id: item.prvKey,
     name: item.prvName,
     phone: item.prvPhone,
     address: item.prvAddress,
@@ -54,15 +54,28 @@ export const get = async ({ name, phone, address, pageSize, page }) => {
   return result;
 
 };
-export const getById = async (prvId) => {
+export const getById = async (key, ignoreDeleted = FALSE) => {
   const comId = GetEmpresaIdByUser()
   let result = null
-  if (prvId) {
+  if (key) {
+    let where = {}
+    if (ignoreDeleted) {
+      where = {
+        prvKey: key,
+        prvComId: comId
+      }
+    } else {
+      where = {
+        prvKey: key,
+        prvComId: comId,
+        prvDeleted: FALSE
+      }
+    }
     const prvplier = await prisma.providers.findFirst({
-      where: { prvId: Number(prvId), prvComId: Number(comId) },
+      where: where,
     });
     result = {
-      id: prvplier.prvId,
+      id: prvplier.prvKey,
       name: prvplier.prvName,
       phone: prvplier.prvPhone,
       address: prvplier.prvAddress,
@@ -77,7 +90,8 @@ export const add = async ({ name, phone, address, image }) => {
   const prvplier = await prisma.providers.create({
     data: { prvName: name, prvPhone: phone, prvAddress: address, prvImage: image, prvComId: comId },
   });
-  return prvplier;
+  const providerResult = await getById(prvplier.prvKey)
+  return providerResult;
 
 };
 export const update = async ({ prvId, name, phone, address, image }) => {
@@ -85,16 +99,18 @@ export const update = async ({ prvId, name, phone, address, image }) => {
     where: { prvKey: prvId },
     data: { prvName: name, prvPhone: phone, prvAddress: address, prvImage: image },
   });
-  return prvplierUpdate;
+  const providerResult = await getById(prvplierUpdate.prvKey)
+  return providerResult;
 
 };
-export const remove = async (prvId) => {
-  const prvplierDelete = await prisma.providers.updateMany({
+export const remove = async (prvKey) => {
+  const providerDelete = await prisma.providers.updateMany({
     where: {
-      prvKey: prvId
+      prvKey: prvKey
     },
     data: { prvDeleted: TRUE }
   });
-  return prvplierDelete;
+  const providerResult = await getById(prvKey, TRUE)
+  return providerResult;
 
 };

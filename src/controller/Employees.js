@@ -68,15 +68,25 @@ export const get = async ({ firstName, lastName, email, phone, pageSize, page })
   return result
 
 };
-export const getById = async (empId) => {
+export const getById = async (key, ignoreDeleted = FALSE) => {
   let result = null
-  if (empId) {
+  if (key) {
     const comId = GetEmpresaIdByUser()
-    const Employee = await prisma.employees.findFirst({
-      where: {
-        empKey: empId,
+    let where = {}
+    if (ignoreDeleted) {
+      where = {
+        empKey: key,
         empComId: comId
-      },
+      }
+    } else {
+      where = {
+        empKey: key,
+        empComId: comId,
+        empDeleted: FALSE
+      }
+    }
+    const Employee = await prisma.employees.findFirst({
+      where: where
     });
     result = {
       id: Employee.empKey,
@@ -101,7 +111,8 @@ export const add = async ({ firstName, lastName, email, phone, salary }) => {
       empPhone: phone, empSalary: Number(salary), empComId: comId
     },
   });
-  return Employee;
+  const employeeResult = await getById(Employee.empKey)
+  return employeeResult;
 
 };
 export const update = async ({ id, firstName, lastName, email, phone, salary }) => {
@@ -113,15 +124,17 @@ export const update = async ({ id, firstName, lastName, email, phone, salary }) 
       empPhone: phone, empSalary: Number(salary)
     },
   });
-  return EmployeeUpdate;
+  const employeeResult = await getById(EmployeeUpdate.empKey)
+  return employeeResult;
 
 };
 export const remove = async (empKey) => {
   const EmployeeDelete = await prisma.employees.updateMany({
-    where: { empKey: empId }, data: {
+    where: { empKey: empKey }, data: {
       empDeleted: TRUE
     }
   });
-  return EmployeeDelete;
+  const employeeResult = await getById(empKey, TRUE)
+  return employeeResult;
 
 };

@@ -8,8 +8,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model actives {
+  actId          Int       @id(map: "PK_actives") @default(autoincrement())
+  actCreateAT    DateTime? @db.DateTime
+  actUpdateAT    DateTime? @db.DateTime
+  actDeleted     Int       @default(0, map: "DF_actives_actDeleted") @db.TinyInt
+  actCodigo      String?   @db.NVarChar(500)
+  actDescription String?   @db.NVarChar(500)
+  actComId       Int?
+  actKey         String?   @default(dbgenerated("newid()"), map: "DF_actives_actKey") @db.UniqueIdentifier
+  actCliId       Int?
+  actMaintenice  Int       @default(0, map: "DF_actives_actMaintenice") @db.TinyInt
+  clients        clients?  @relation(fields: [actCliId], references: [cliId], onDelete: NoAction, onUpdate: NoAction, map: "FK_actives_clients")
+  companys       companys? @relation(fields: [actComId], references: [comId], onDelete: NoAction, onUpdate: NoAction, map: "FK_actives_companys")
+}
+
 model clients {
-  cliId        Int       @default(autoincrement())
+  cliId        Int       @id(map: "PK__clients__7F6E8DA931E2B7FF") @default(autoincrement())
   cliCreatedAt DateTime  @default(now(), map: "DF__clients__cliCrea__4CA06362") @db.DateTime
   cliUpdatedAt DateTime? @db.DateTime
   cliDeleted   Int       @default(0, map: "DF__clients__cliDele__4BAC3F29") @db.TinyInt
@@ -18,7 +33,8 @@ model clients {
   cliEmail     String    @db.NVarChar(191)
   cliPhone     String    @db.NVarChar(191)
   cliComId     Int
-  cliKey       String    @id(map: "PK__clients__7F6E8DA931E2B7FF") @default(dbgenerated("newid()"), map: "DF__clients__cliKey__282DF8C2") @db.UniqueIdentifier
+  cliKey       String    @default(dbgenerated("newid()"), map: "DF__clients__cliKey__282DF8C2") @db.UniqueIdentifier
+  actives      actives[]
   companys     companys  @relation(fields: [cliComId], references: [comId], onUpdate: NoAction, map: "FK_clients_companys")
 }
 
@@ -31,6 +47,7 @@ model companys {
   comPhone     String?     @db.NVarChar(191)
   comAddress   String?     @db.NVarChar(191)
   comKey       String      @default(dbgenerated("newid()"), map: "DF__companys__comKey__29221CFB") @db.UniqueIdentifier
+  actives      actives[]
   clients      clients[]
   employees    employees[]
   products     products[]
@@ -128,19 +145,22 @@ model purchasesdetails {
 }
 
 model sales {
-  salId        Int            @id(map: "PK__sales__E3E89296E89D3966") @default(autoincrement())
-  salCreatedAt DateTime       @default(now(), map: "DF__sales__salCreate__6A30C649") @db.DateTime
-  salUpdatedAt DateTime?      @db.DateTime
-  salDeleted   Int            @default(0, map: "DF__sales__salDelete__6C190EBB") @db.TinyInt
-  salDate      DateTime       @default(now(), map: "DF__sales__salDate__6D0D32F4") @db.DateTime
-  salTotal     Float          @default(0, map: "DF__sales__salTotal__6E01572D")
-  salLiteral   String         @db.NVarChar(191)
-  salComId     Int
-  salCliId     Int
-  salClose     Int            @default(0, map: "DF__sales__salClose__6EF57B66") @db.TinyInt
-  salUseId     Int?
-  salKey       String         @default(dbgenerated("newid()"), map: "DF__sales__salKey__2EDAF651") @db.UniqueIdentifier
-  salesdetails salesdetails[]
+  salId            Int            @id(map: "PK__sales__E3E89296E89D3966") @default(autoincrement())
+  salCreatedAt     DateTime       @default(now(), map: "DF__sales__salCreate__6A30C649") @db.DateTime
+  salUpdatedAt     DateTime?      @db.DateTime
+  salDeleted       Int            @default(0, map: "DF__sales__salDelete__6C190EBB") @db.TinyInt
+  salDate          DateTime       @default(now(), map: "DF__sales__salDate__6D0D32F4") @db.DateTime
+  salTotal         Float          @default(0, map: "DF__sales__salTotal__6E01572D")
+  salLiteral       String         @db.NVarChar(191)
+  salComId         Int
+  salCliId         Int
+  salClose         Int            @default(0, map: "DF__sales__salClose__6EF57B66") @db.TinyInt
+  salUseId         Int?
+  salKey           String         @default(dbgenerated("newid()"), map: "DF__sales__salKey__2EDAF651") @db.UniqueIdentifier
+  salDescuento     Float?         @default(0, map: "DF_sales_salDescuento")
+  salTotalWithDesc Float?
+  salTotalDesc     Float?
+  salesdetails     salesdetails[]
 }
 
 model salesdetails {
@@ -182,19 +202,4 @@ model users {
   useComId     Int
   useKey       String    @default(dbgenerated("newid()"), map: "DF__users__useKey__31B762FC") @db.UniqueIdentifier
   companys     companys  @relation(fields: [useComId], references: [comId], onUpdate: NoAction, map: "FK_users_companys")
-}
-
-view viewsalesdetails {
-  sadId              Int    @unique
-  sadKey             String @db.UniqueIdentifier
-  sadSubTotal        Float
-  salLastItem        Int    @db.TinyInt
-  sadSalId           Int
-  sadUseId           Int
-  sadProdCount       Float
-  sadProdPrice       Float
-  sadProdDescription String @db.NVarChar(191)
-  sadProdId          Int
-  proKey             String @db.UniqueIdentifier
-  sadDeleted         Int    @db.TinyInt
 }

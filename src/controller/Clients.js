@@ -51,8 +51,6 @@ export const
     if (orConditions.length > 0) {
       filter.where.OR = orConditions
     }
-
-    console.log(filter)
     const clients = await prisma.clients.findMany(filter);
     const result = clients.map(item =>
     ({
@@ -65,17 +63,27 @@ export const
     return result
 
   };
-export const getById = async (key) => {
+export const getById = async (key, ignoreDeleted = FALSE) => {
 
 
   let result = null
   if (key) {
     const comId = GetEmpresaIdByUser()
-    const Client = await prisma.clients.findFirst({
-      where: {
+    let where = {}
+    if (ignoreDeleted) {
+      where = {
         cliKey: key,
         cliComId: comId
-      },
+      }
+    } else {
+      where = {
+        cliKey: key,
+        cliComId: comId,
+        cliDeleted: FALSE
+      }
+    }
+    const Client = await prisma.clients.findFirst({
+      where: where,
     });
     result = {
       id: Client.cliKey,
@@ -102,7 +110,8 @@ export const add = async (client) => {
       cliComId: comId
     },
   });
-  return Client;
+  const clientResult = await getById(Client.CliKey)
+  return clientResult;
 
 };
 export const update = async ({ id, firstName, lastName, email, phone }) => {
@@ -115,7 +124,8 @@ export const update = async ({ id, firstName, lastName, email, phone }) => {
       cliPhone: phone
     },
   });
-  return ClientUpdate
+  const clientResult = await getById(ClientUpdate.CliKey)
+  return clientResult
 };
 export const remove = async (cliKey) => {
   const comId = GetEmpresaIdByUser()
@@ -126,6 +136,7 @@ export const remove = async (cliKey) => {
       cliDeleted: TRUE
     }
   });
-  return ClientDelete;
+  const clientResult = await getById(cliKey, TRUE)
+  return clientResult;
 
 };

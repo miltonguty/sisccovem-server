@@ -38,7 +38,8 @@ router.put('/Products', async function(req, res) {
 });
 router.get('/Products/:proId', async function(req, res) {
     try {
-        const result = await getById(req, res);
+        const { proId } = req.params
+        const result = await getById(proId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)

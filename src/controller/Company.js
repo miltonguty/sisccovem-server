@@ -53,10 +53,21 @@ export const get = async ({ name, phone, address, pageSize, page }) => {
   return result;
 
 };
-export const getById = async (comKey) => {
-  if (comKey) {
+export const getById = async (comKey, ignoreDeleted = FALSE) => {
+if (comKey) {
+    let where = {}
+    if (ignoreDeleted) {
+      where = {
+        comKey: comKey
+      }
+    } else {
+      where = {
+        comKey: comKey,
+        comDeleted: FALSE
+      }
+    }
     const company = await prisma.companys.findFirst({
-      where: { comKey: Number(comKey) },
+      where: where
     });
     const result = {
       id: company.comKey,
@@ -75,7 +86,8 @@ export const add = async ({ name, phone, address }) => {
   const company = await prisma.companys.create({
     data: { comName: name, comPhone: phone, comAddress: address },
   });
-  return company;
+  const companyResult = await getById(company.ComKey)
+  return companyResult;
 
 };
 export const update = async ({ id, name, phone, address }) => {
@@ -84,7 +96,8 @@ export const update = async ({ id, name, phone, address }) => {
     where: { comKey: id },
     data: { comName: name, comPhone: phone, comAddress: address },
   });
-  return companyUpdate
+  const companyResult = await getById(companyUpdate.ComKey)
+  return companyResult
 
 };
 export const remove = async (comKey) => {
@@ -95,6 +108,7 @@ export const remove = async (comKey) => {
       comDeleted: TRUE
     }
   });
-  return companyDelete
+  const companyResult = await getById(comKey, TRUE)
+  return companyResult
 
 };

@@ -41,4 +41,22 @@ export function SetFilterProviders ({ page, pageSize, name, phone, address }) {
         pageSize: pageSize ? pageSize : Number.MAX_SAFE_INTEGER
     }
     return filter
-} 
+}
+export function SetFilterUsers ({ page, pageSize, userName, email }) {
+
+    const filter = {
+        page: page ? page - 1 : 0,
+        userName, email,
+        pageSize: pageSize ? pageSize : Number.MAX_SAFE_INTEGER
+    }
+    return filter
+}
+export function SetFilterActives ({ page, pageSize, codigo, description, cliId }) {
+
+    const filter = {
+        page: page ? page - 1 : 0,
+        codigo, description, cliId,
+        pageSize: pageSize ? pageSize : Number.MAX_SAFE_INTEGER
+    }
+    return filter
+}
