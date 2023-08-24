@@ -9,6 +9,7 @@ import salesRoute from './sales.js'
 import sessionRoute from './session.js'
 import userRoute from './users.js'
 import activesRoute from './actives.js'
+import rutesRoute from './rutes.js'
 
 export default {
     ClientsRoute,
@@ -21,6 +22,6 @@ export default {
     salesRoute,
     sessionRoute,
     userRoute,
-    activesRoute
-
+    activesRoute,
+    rutesRoute
 }

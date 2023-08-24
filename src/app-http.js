@@ -18,12 +18,12 @@ export const appHttp = (app) => {
     app.use('/api/', routes.EmployeesRoute);
     app.use('/api/', routes.ProductsRoute);
     app.use('/api/', routes.PurchasesRoute);
-    app.use('/api/', routes.ReportsRoute);
     app.use('/api/', routes.ProvidersRoute);
     app.use('/api/', routes.salesRoute);
     app.use('/api/', routes.sessionRoute);
     app.use('/api/', routes.userRoute);
     app.use('/api/', routes.activesRoute);
+    app.use('/pdf', routes.ReportsRoute);
 
 
 

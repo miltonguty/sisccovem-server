@@ -1,0 +1,85 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>{{datas.title}}</title>
+  </head>
+  <style>
+    /*******STYLES BASE*****/
+    html {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+        "Liberation Mono", "Courier New", monospace;
+    }
+
+    .title {
+      text-align: center;
+      display: block;
+    }
+    .header {
+      padding-top: 10px;
+      display: block;
+    }
+    .header-title {
+      font-size: 24px;
+      text-transform: uppercase;
+    }
+    .header-address {
+      font-size: 14px;
+    }
+    .header-phone {
+      font-size: 14px;
+    }
+    .bold {
+      font-weight: 700;
+    }
+    .upercase {
+      text-transform: uppercase;
+    }
+    th {
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    table,
+    th {
+      border: 1px solid black;
+    }
+    .center {
+      text-align: center;
+    }
+    .left {
+      text-align: left;
+    }
+    .right {
+      text-align: right;
+    }
+  </style>
+  <body>
+    <h1 class="title upercase bold">{{datas.title}}</h1>
+
+    {{#each datas.records}}
+    <h2 class="upercase bold">{{this.secName}}</h2>
+    <table style="width: 100%">
+      <tr>
+        <th style="width: 5%">N</th>
+        <th style="width: 45%">Descripcion</th>
+        <th style="width: 10%">Precio de venta</th>
+        <th style="width: 10%">Precio de compra</th>
+        <th style="width: 10%">stock</th>
+        <th style="width: 15%">Image</th>
+      </tr>
+      {{#each products}}
+      <tr>
+        <td class="center">{{n}}</td>
+        <td class="left">{{proDescription}}</td>
+        <td class="center">{{proPriceSales}}</td>
+        <td class="center">{{proPricePurchase}}</td>
+        <td class="center">{{proStock}}</td>
+        <td class="center">{{proImage}}</td>
+      </tr>
+      {{/each}}
+    </table>
+    {{/each}}
+    <span class="upercase bold right">
+      Total Records {{datas.totalRecords}}
+    </span>
+  </body>
+</html>

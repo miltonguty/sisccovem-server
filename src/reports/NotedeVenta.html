@@ -1,10 +1,138 @@
+<html>
 
-{{> Header }}
-<body>
-    <h1> Body </h1>
-    <h1> Body </h1>
-    <h1> Body </h1>
-    <h1> Body </h1>
-    
-</body>
-{{> Footer }}
+    <head>
+        <meta charset="utf-8" />
+        <title>{{datas.title}}</title>
+
+    </head>
+    <style>
+        /*******STYLES BASE*****/
+  html {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+        "Liberation Mono", "Courier New", monospace;
+    }
+
+    .title {
+      text-align: center;
+      display: block;
+    }
+    .header {
+      padding-top: 10px;
+      display: block;
+    }
+    .header-title {
+      font-size: 24px;
+      text-transform: uppercase;
+    }
+    .header-address {
+      font-size: 14px;
+    }
+    .header-phone {
+      font-size: 14px;
+    }
+    .bold {
+      font-weight: 700;
+    }
+    .upercase {
+      text-transform: uppercase;
+    }
+    th {
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    table,
+    th {
+      border: 1px solid black;
+    }
+    .center {
+      text-align: center;
+    }
+        /*******CUSTON*****/
+        .note-sales-detail {
+            margin: 0 20px;
+        }
+
+        table {
+            width: 100%;
+        }
+
+        table th.count {
+            width: 100px;
+        }
+
+        table th.description {
+            width: 500px;
+        }
+
+        table th.price {
+            width: 100px;
+        }
+
+        table th.subtotal {
+            width: 100px;
+        }
+
+        table td.count {
+            text-align: right;
+        }
+
+        table td.description {
+            text-align: center;
+        }
+
+        table td.price {
+            text-align: right;
+        }
+
+        table td.subtotal {
+            text-align: right;
+        }
+
+        
+    </Style>
+    <div>
+        <div>
+            <div class="title bold upercase"> nota de venta N {{datas.records.id}} </div>
+            <div>
+                <span> <span class="bold upercase"> Codigo: </span> {{datas.records.client.id }}</span>
+                <span> <span class=" bold upercase"> Cliente: </span> {{ datas.records.client.firstName }}   {{ datas.records.client.lastName }}</span>
+                <span> <span class=" bold upercase"> Rute: </span class= " upercase"> {{ datas.records.client.rute }} </span>
+
+            </div>
+            <div class="note-sales-detail ">
+                <table>
+                    <thead>
+                        <tr >
+                            <th class="count ">cantidad</th>
+                            <th class="description ">description</th>
+                            <th class="price ">precio</th>
+                            <th class="subtotal ">subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        {{#each datas.records.salesdetails}}
+                            <tr>
+                                <td class="count">{{ count }} </td>
+                                <td class="description"> {{ description }} </td>
+                                <td class="price">{{ price }} </td>
+                                <td class="subtotal"> {{subTotal }}</td>
+                            </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+                <div>
+                    <div><span class="bold upercase">Total :</span> {{ datas.records.total }}</div>
+                    <div><span class="bold upercase">desc :
+                        </span>{{ datas.records.descuento }}%&nbsp;&nbsp;-&gt;&nbsp;&nbsp;&nbsp;&nbsp;
+                        {{ datas.records.totalDesc }}</div>
+                    <div><span class="bold upercase">Total con descuento :</span> {{ datas.records.totalWithDesc }}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    </body>
+
+</html>

@@ -60,3 +60,21 @@ export function SetFilterActives ({ page, pageSize, codigo, description, cliId }
     }
     return filter
 }
+export function SetFilterRutes ({ page, pageSize, name, description }) {
+
+    const filter = {
+        page: page ? page - 1 : 0,
+        name, description,
+        pageSize: pageSize ? pageSize : Number.MAX_SAFE_INTEGER
+    }
+    return filter
+}
+export function SetFilterSections ({ page, pageSize, name, description }) {
+
+    const filter = {
+        page: page ? page - 1 : 0,
+        name, description,
+        pageSize: pageSize ? pageSize : Number.MAX_SAFE_INTEGER
+    }
+    return filter
+}

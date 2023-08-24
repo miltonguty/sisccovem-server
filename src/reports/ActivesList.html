@@ -1,0 +1,79 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>{{datas.title}}</title>
+  </head>
+  <style>
+    /*******STYLES BASE*****/
+    html {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+        "Liberation Mono", "Courier New", monospace;
+    }
+
+    .title {
+      text-align: center;
+      display: block;
+    }
+    .header {
+      padding-top: 10px;
+      display: block;
+    }
+    .header-title {
+      font-size: 24px;
+      text-transform: uppercase;
+    }
+    .header-address {
+      font-size: 14px;
+    }
+    .header-phone {
+      font-size: 14px;
+    }
+    .bold {
+      font-weight: 700;
+    }
+    .upercase {
+      text-transform: uppercase;
+    }
+    th {
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    table,
+    th {
+      border: 1px solid black;
+    }
+    .center {
+      text-align: center;
+    }
+    .left {
+      text-align: left;
+    }
+    .right {
+      text-align: right;
+    }
+  </style>
+  <body>
+    <h1 class="title upercase bold">{{datas.title}}</h1>
+
+    <table style="width: 100%">
+      <tr>
+        <th style="width: 5%">N</th>
+        <th style="width: 25%">Codigo</th>
+        <th style="width: 45%">Desccripcion</th>
+        <th style="width: 10%">En Mantenimiento</th>
+      </tr>
+      {{#each datas.records}}
+      <tr>
+        <td class="center">{{@index}}</td>
+        <td class="left">{{actCodigo}}</td>
+        <td class="center">{{actDescription}}</td>
+        <td class="center">{{actMaintenice}}</td>
+      </tr>
+      {{/each}}
+    </table>
+
+    <span class="upercase bold right">
+      Total Records {{datas.totalRecords}}
+    </span>
+  </body>
+</html>

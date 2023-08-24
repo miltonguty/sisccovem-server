@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node src/app.js"
+    "start": "node src/app.js"    
   },
   "type": "module",
   "repository": {
@@ -20,14 +20,13 @@
   "devDependencies": {
     "cors": "^2.8.5",
     "express": "^4.18.2",
-    "handlebars": "^4.7.7",
-    "html-pdf": "^1.5.0",
     "prisma": "^5.0.0"
   },
   "dependencies": {
     "@prisma/client": "^4.14.0",
     "body-parser": "^1.20.2",
     "md5": "^2.3.0",
+    "pdf-creator-node": "^2.3.5",
     "uuid": "^9.0.0"
   }
 }

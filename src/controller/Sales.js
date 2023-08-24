@@ -1,6 +1,6 @@
 /*** CONTROLLER*/
 import { FALSE, TRUE } from "../constants.js";
-import createPdf from "../lib/PdfFiles.js";
+
 import prisma from "../lib/prisma.js";
 import { GetEmpresaIdByUser, GetCurrentUserId } from "../lib/utils.js";
 import { getById } from "./Clients.js";
@@ -33,7 +33,7 @@ export const GetSalesById = async (salId) => {
   )
   let salesNote = null
   if (currentSale != null) {
-    const client = await prisma.clients.findFirst({ where: { cliId: currentSale.salCliId } })
+    const client = await prisma.clients.findFirst({ where: { cliId: currentSale.salCliId }, include: { Rutes: true } })
     salesNote = {
       id: currentSale.salId,
       total: (Number(currentSale.salTotal)).toFixed(2),
@@ -43,7 +43,8 @@ export const GetSalesById = async (salId) => {
       client: {
         firstName: client.cliFirstName,
         lastName: client.cliLastName,
-        id: client.cliKey
+        id: client.cliKey,
+        rute: client.Rutes.rutName
       },
       salesdetails: []
     }

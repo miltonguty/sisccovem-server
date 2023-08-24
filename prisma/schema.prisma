@@ -34,8 +34,10 @@ model clients {
   cliPhone     String    @db.NVarChar(191)
   cliComId     Int
   cliKey       String    @default(dbgenerated("newid()"), map: "DF__clients__cliKey__282DF8C2") @db.UniqueIdentifier
+  cliRutId     Int?
   actives      actives[]
   companys     companys  @relation(fields: [cliComId], references: [comId], onUpdate: NoAction, map: "FK_clients_companys")
+  Rutes        Rutes?    @relation(fields: [cliRutId], references: [rutId], onDelete: NoAction, onUpdate: NoAction, map: "FK_clients_Rutes")
 }
 
 model companys {
@@ -52,6 +54,8 @@ model companys {
   employees    employees[]
   products     products[]
   providers    providers[]
+  Rutes        Rutes[]
+  Sections     Sections[]
   users        users[]
 }
 
@@ -82,7 +86,9 @@ model products {
   proComId         Int
   proStock         Float              @default(0, map: "DF__products__proSto__5BE2A6F2")
   proKey           String             @default(dbgenerated("newid()"), map: "DF__products__proKey__2B0A656D") @db.UniqueIdentifier
+  proSecId         Int?
   companys         companys           @relation(fields: [proComId], references: [comId], onUpdate: NoAction, map: "FK_products_companys")
+  Sections         Sections?          @relation(fields: [proSecId], references: [secId], onDelete: NoAction, onUpdate: NoAction, map: "FK_products_Sections")
   purchasesdetails purchasesdetails[]
   salesdetails     salesdetails[]
 }
@@ -202,4 +208,30 @@ model users {
   useComId     Int
   useKey       String    @default(dbgenerated("newid()"), map: "DF__users__useKey__31B762FC") @db.UniqueIdentifier
   companys     companys  @relation(fields: [useComId], references: [comId], onUpdate: NoAction, map: "FK_users_companys")
+}
+
+model Rutes {
+  rutId          Int       @id(map: "PK_Rutes") @default(autoincrement())
+  rutCreatedAt   DateTime? @default(now(), map: "DF_Rutes_rutCreatedAt") @db.DateTime
+  rutUpdatedAt   DateTime? @db.DateTime
+  rutDeleted     Int       @default(0, map: "DF_Rutes_rutDeleted") @db.TinyInt
+  rutName        String?   @db.NVarChar(50)
+  rutDescription String?   @db.NVarChar(50)
+  rutKey         String?   @default(dbgenerated("newid()"), map: "DF_Rutes_rutKey") @db.UniqueIdentifier
+  rutComId       Int?
+  clients        clients[]
+  companys       companys? @relation(fields: [rutComId], references: [comId], onDelete: NoAction, onUpdate: NoAction, map: "FK_Rutes_companys")
+}
+
+model Sections {
+  secId          Int        @id(map: "PK_Sections") @default(autoincrement())
+  secKey         String     @default(dbgenerated("newid()"), map: "DF_Sections_secKey") @db.UniqueIdentifier
+  secCreatedAt   DateTime   @default(now(), map: "DF_Sections_secCreatedAt") @db.DateTime
+  secUpdateAt    DateTime?  @db.DateTime
+  secDeleted     Int        @default(0, map: "DF_Sections_secDeleted") @db.TinyInt
+  secName        String     @db.NVarChar(50)
+  secDescription String     @db.NVarChar(50)
+  secComId       Int
+  products       products[]
+  companys       companys   @relation(fields: [secComId], references: [comId], onUpdate: NoAction, map: "FK_Sections_companys")
 }
