@@ -10,3 +10,9 @@ export function GetPurchaseId (userId = "") {
 export function GetCurrentUserId () {
   return 1;
 }
+export const MessageError = (message, ErrorNumber = 403) => {
+  return {
+    ErrorNumber: 403,
+    error: { message }
+  }
+}

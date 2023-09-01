@@ -4,7 +4,7 @@ import { SetFilterClients } from '../../lib/Filters.js';
 
 var router = express.Router();
 
-router.get('/clients', async function(req, res) {
+router.get('/clients',  async function(req, res) {
     try {
         const filter = SetFilterClients(req.query)
         const result = await get(filter);

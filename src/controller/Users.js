@@ -15,7 +15,7 @@ export const login = async (userName, password) => {
     if (userResult.length > 0) {
         
         return {
-            accessToken:"rrewuyiropewyuriewyuriewyruiewryuewiyuiewrryuewirewyuiopyurew",
+            
             name: userResult[0].useName,
             email: userResult[0].useEmail,
             company: {
