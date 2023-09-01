@@ -1,9 +1,10 @@
 import pdf from "pdf-creator-node"
 import fs from "fs"
+
 const pdfCreator = async (inputTemplate, outputPdf, headerTemplate, footerTemplate, datas) => {
     let html = fs.readFileSync(inputTemplate, "utf8");
     let options = {
-        format: "A3",
+        format: "Legal",
         orientation: "portrait",
         border: "15mm",
 

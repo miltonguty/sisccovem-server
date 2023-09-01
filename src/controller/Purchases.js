@@ -1,22 +1,37 @@
 /*** CONTROLLER*/
-import { TRUE } from "../constants.js";
+import { FALSE, TRUE } from "../constants.js";
 import prisma from "../lib/prisma.js";
 import { GetEmpresaIdByUser, GetCurrentUserId } from "../lib/utils.js";
-export const get = async (filter) => {
+export const get = async ({ number, pageSize, page }) => {
 
-  let filterObject = {}
-
-  if (filter) {
-    filterObject = {
-      where: {
-        purId: {
-          contains: filter,
-        },
+  const comId = GetEmpresaIdByUser()
+  let filter = {
+    skip: Number(page * pageSize),
+    take: Number(pageSize),
+    orderBy: [
+      {
+        purId: 'desc',
       }
+    ],
+    where: {
+      purComId: comId,
+      purDeleted: FALSE
     }
-  };
+  }
+  const orConditions = []
+  if (number) {
+    orConditions.push(
+      {
+        purNumber: {
+          contains: number,
+        }
+      })
+  }
 
-  const purchases = await prisma.purchases.findMany(filterObject);
+  if (orConditions.length > 0) {
+    filter.where.OR = orConditions
+  }
+  const purchases = await prisma.purchases.findMany(filter);
   const result = purchases.map(item =>
   ({
     id: item.purId,
@@ -27,47 +42,79 @@ export const get = async (filter) => {
   return result;
 
 };
-export const getById = async (req, res) => {
+export const getById = async (purId) => {
 
-  const { purId } = req.query;
+
   let result = null
   if (purId) {
     const Purchase = await prisma.purchases.findFirst({
-      where: { purId: purId },
+      where: { purId: Number(purId), purDeleted: FALSE },
+      include: {
+        purchasesdetails: { where: { pudDeleted: FALSE } },
+        providers: true
+      }
     });
+    const purchasesdetails = Purchase.purchasesdetails.map(item => {
+      return {
+        id: item.pudKey,
+        deleted: item.pudDeleted,
+        counter: item.pudCounter,
+        prodId: item.pudProdId,
+        description: item.pudProdDescription,
+        count: item.pudProdCount,
+        purId: item.pudPurId,
+        price: item.pudProdPrice,
+        subTotal: item.pudSubTotal,
+
+      }
+    })
     result = {
       id: Purchase.purId,
       date: Purchase.purDate,
       total: Purchase.purTotal,
-      comId: Purchase.purComId
+      comId: Purchase.purComId,
+      provider: {
+        id: Purchase.providers.prvKey,
+        name: Purchase.providers.prvName,
+        phone: Purchase.providers.prvPhone,
+        address: Purchase.providers.prvAddress
+      },
+      details: purchasesdetails
     }
   }
   return result;
 
 };
-export const add = async (req, res) => {
+export const add = async (providerId) => {
 
   const userId = GetCurrentUserId()
   const ComId = GetEmpresaIdByUser(userId)
-
-  const Purchase = await prisma.purchases.create({
-    data: { purComId: ComId },
+  const provider = await prisma.providers.findMany({
+    where: { prvKey: providerId },
   });
-
-  let purchaseDetailsupdated = await prisma.purchasesDetails.updateMany({
-    where: { pudUseId: userId, pudPurId: null },
-    data: { pudPurId: Purchase.purId }
+  let purchase = null
+  if (provider.length > 0) {
+    purchase = await prisma.purchases.create({
+      data: { purComId: ComId, purPrvId: provider[0].prvId },
+    });
+    purchase = {
+      date: purchase.purDate,
+      id: purchase.purId,
+      number: purchase.purNumber,
+      prvId: provider.prvKey,
+      total: purchase.purTotal
+    }
   }
-  )
 
-  return Purchase;
-
+  return purchase;
 };
-export const update = async (req, res) => {
-  const { id, ComId } = req.body;
+export const update = async ({ purPrvId }) => {
   const PurchaseUpdate = await prisma.purchases.update({
     where: { purId: id },
-    data: { purComId: ComId },
+    data: {
+      purComId: ComId,
+      purPrvId: purPrvId
+    },
   });
   return PurchaseUpdate
 
@@ -81,4 +128,23 @@ export const remove = async (purId) => {
 
   return PurchaseDelete
 
+};
+export const addDetails = async ({ purchaseId, prodId, price, description, count }) => {
+
+  const userId = GetCurrentUserId()
+  const ComId = GetEmpresaIdByUser(userId)
+  const product = await prisma.products.findFirst({ where: { proKey: prodId } })
+  const purchasesdetails = await prisma.purchasesdetails.create({
+    data: {
+      pudPurId: Number(purchaseId),
+      pudUseId: userId,
+      pudProdId: Number(product.proId),
+      pudProdPrice: Number(price),
+      pudProdDescription: description,
+      pudProdCount: Number(count)
+    },
+  });
+
+  const purchase = await getById(purchaseId)
+  return purchase;
 };

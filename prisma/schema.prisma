@@ -37,7 +37,8 @@ model clients {
   cliRutId     Int?
   actives      actives[]
   companys     companys  @relation(fields: [cliComId], references: [comId], onUpdate: NoAction, map: "FK_clients_companys")
-  Rutes        Rutes?    @relation(fields: [cliRutId], references: [rutId], onDelete: NoAction, onUpdate: NoAction, map: "FK_clients_Rutes")
+  Rutes        rutes?    @relation(fields: [cliRutId], references: [rutId], onDelete: NoAction, onUpdate: NoAction, map: "FK_clients_Rutes")
+  sales        sales[]
 }
 
 model companys {
@@ -52,9 +53,10 @@ model companys {
   actives      actives[]
   clients      clients[]
   employees    employees[]
+  payments     payments[]
   products     products[]
   providers    providers[]
-  Rutes        Rutes[]
+  rutes        rutes[]
   Sections     Sections[]
   users        users[]
 }
@@ -127,6 +129,7 @@ model purchases {
   purUseId         Int?
   purPrvId         Int?
   purKey           String             @default(dbgenerated("newid()"), map: "DF__purchases__purKe__2CF2ADDF") @db.UniqueIdentifier
+  purNumber        String?            @db.NChar(10)
   providers        providers?         @relation(fields: [purPrvId], references: [prvId], onDelete: NoAction, onUpdate: NoAction, map: "FK_purchases_suppliers")
   purchasesdetails purchasesdetails[]
 }
@@ -136,7 +139,6 @@ model purchasesdetails {
   pudCreatedAt       DateTime  @default(now(), map: "DF__purchases__pudCr__59063A47") @db.DateTime
   pudUpdatedAt       DateTime? @db.DateTime
   pudDeleted         Int       @default(0, map: "DF__purchases__pudDe__5AEE82B9") @db.TinyInt
-  pudCounter         Int
   pudProdId          Int
   pudProdDescription String    @db.NVarChar(191)
   pudProdCount       Float     @default(0, map: "DF__purchases__pudPr__5BE2A6F2")
@@ -166,6 +168,8 @@ model sales {
   salDescuento     Float?         @default(0, map: "DF_sales_salDescuento")
   salTotalWithDesc Float?
   salTotalDesc     Float?
+  payments         payments[]
+  clients          clients        @relation(fields: [salCliId], references: [cliId], onUpdate: NoAction, map: "FK_sales_clients")
   salesdetails     salesdetails[]
 }
 
@@ -210,7 +214,34 @@ model users {
   companys     companys  @relation(fields: [useComId], references: [comId], onUpdate: NoAction, map: "FK_users_companys")
 }
 
-model Rutes {
+model Sections {
+  secId          Int        @id(map: "PK_Sections") @default(autoincrement())
+  secKey         String     @default(dbgenerated("newid()"), map: "DF_Sections_secKey") @db.UniqueIdentifier
+  secCreatedAt   DateTime   @default(now(), map: "DF_Sections_secCreatedAt") @db.DateTime
+  secUpdateAt    DateTime?  @db.DateTime
+  secDeleted     Int        @default(0, map: "DF_Sections_secDeleted") @db.TinyInt
+  secName        String     @db.NVarChar(50)
+  secDescription String     @db.NVarChar(50)
+  secComId       Int
+  products       products[]
+  companys       companys   @relation(fields: [secComId], references: [comId], onUpdate: NoAction, map: "FK_Sections_companys")
+}
+
+model payments {
+  payId       Int       @id(map: "PK_Payments") @default(autoincrement())
+  paySalId    Int?
+  payDate     DateTime? @default(now(), map: "DF_Payments_payDate") @db.DateTime
+  payMount    Float?
+  payCreateAt DateTime? @default(now(), map: "DF_Payments_payCreateAt") @db.DateTime
+  payUpdateAt DateTime? @db.DateTime
+  payKey      String?   @default(dbgenerated("newid()"), map: "DF_Payments_payKey") @db.UniqueIdentifier
+  payDeleted  Int?      @default(0, map: "DF_Payments_payDeleted") @db.TinyInt
+  payComId    Int?
+  companys    companys? @relation(fields: [payComId], references: [comId], onDelete: NoAction, onUpdate: NoAction, map: "FK_Payments_companys")
+  sales       sales?    @relation(fields: [paySalId], references: [salId], onDelete: NoAction, onUpdate: NoAction, map: "FK_Payments_sales")
+}
+
+model rutes {
   rutId          Int       @id(map: "PK_Rutes") @default(autoincrement())
   rutCreatedAt   DateTime? @default(now(), map: "DF_Rutes_rutCreatedAt") @db.DateTime
   rutUpdatedAt   DateTime? @db.DateTime
@@ -223,15 +254,41 @@ model Rutes {
   companys       companys? @relation(fields: [rutComId], references: [comId], onDelete: NoAction, onUpdate: NoAction, map: "FK_Rutes_companys")
 }
 
-model Sections {
-  secId          Int        @id(map: "PK_Sections") @default(autoincrement())
-  secKey         String     @default(dbgenerated("newid()"), map: "DF_Sections_secKey") @db.UniqueIdentifier
-  secCreatedAt   DateTime   @default(now(), map: "DF_Sections_secCreatedAt") @db.DateTime
-  secUpdateAt    DateTime?  @db.DateTime
-  secDeleted     Int        @default(0, map: "DF_Sections_secDeleted") @db.TinyInt
-  secName        String     @db.NVarChar(50)
-  secDescription String     @db.NVarChar(50)
-  secComId       Int
-  products       products[]
-  companys       companys   @relation(fields: [secComId], references: [comId], onUpdate: NoAction, map: "FK_Sections_companys")
+view clientsview {
+  cliId        Int       @unique @default(autoincrement())
+  cliCreatedAt DateTime  @db.DateTime
+  cliUpdatedAt DateTime? @db.DateTime
+  cliDeleted   Int       @db.TinyInt
+  cliFirstName String    @db.NVarChar(191)
+  cliLastName  String    @db.NVarChar(191)
+  cliEmail     String    @db.NVarChar(191)
+  cliPhone     String    @db.NVarChar(191)
+  cliComId     Int
+  cliKey       String    @db.UniqueIdentifier
+  cliRutId     Int?
+  deuda        Float?
+}
+
+view salesview {
+  salId         Int       @unique
+  salCreatedAt  DateTime  @db.DateTime
+  salUpdatedAt  DateTime? @db.DateTime
+  salDeleted    Int       @db.TinyInt
+  salDate       DateTime  @db.DateTime
+  salLiteral    String    @db.NVarChar(191)
+  salComId      Int
+  salCliId      Int
+  salClose      Int       @db.TinyInt
+  salUseId      Int?
+  salKey        String    @db.UniqueIdentifier
+  salDescuento  Float?
+  total         Float?
+  totalDesc     Float?
+  totalWithDesc Float?
+  totalPayment  Float?
+  due           Float?
+  cliFirstName  String    @db.NVarChar(191)
+  cliLastName   String    @db.NVarChar(191)
+  cliKey        String    @db.UniqueIdentifier
+  rutName       String?   @db.NVarChar(50)
 }

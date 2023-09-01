@@ -13,18 +13,18 @@ export const login = async (userName, password) => {
         }
     })
     if (userResult.length > 0) {
-
+        
         return {
-
-            "name": userResult[0].useName,
-            "email": userResult[0].useEmail,
-            "company": {
-                "name": userResult[0].companys.comName,
-                "phone": userResult[0].companys.comPhone,
-                "address": userResult[0].companys.comAddress,
-                "id": userResult[0].companys.comKey
+            accessToken:"rrewuyiropewyuriewyuriewyruiewryuewiyuiewrryuewirewyuiopyurew",
+            name: userResult[0].useName,
+            email: userResult[0].useEmail,
+            company: {
+                name: userResult[0].companys.comName,
+                phone: userResult[0].companys.comPhone,
+                address: userResult[0].companys.comAddress,
+                id: userResult[0].companys.comKey
             },
-            "id": userResult[0].useKey
+            id: userResult[0].useKey
         }
     }
     return null

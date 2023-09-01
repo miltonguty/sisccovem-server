@@ -3,10 +3,44 @@ import { FALSE, TRUE } from "../constants.js";
 
 import prisma from "../lib/prisma.js";
 import { GetEmpresaIdByUser, GetCurrentUserId } from "../lib/utils.js";
-import { getById } from "./Clients.js";
 import { addUpdate, remove as removeDetailbyId } from "./SalesDetails.js";
+
 export const NOTE_SALES_CLOSE = 1;
+
 export const NOTE_SALES_OPEN = 0;
+
+export const GetSales = async () => {
+  const userId = GetCurrentUserId()
+  const comId = GetEmpresaIdByUser(userId)
+  let sales = await prisma.salesview.findMany({
+    where: { salDeleted: FALSE, salComId: comId },
+    orderBy: [
+      {
+        salId: 'desc',
+      }]
+  })
+  sales = sales.map(async (item) => {
+    return {
+      id: item.salId,
+      total: (Number(item.salTotal)).toFixed(2),
+      descuento: item.salDescuento,
+      date: item.salDate,
+      totalWithDesc: (Number(item.salTotalWithDesc)).toFixed(2),
+      totalDesc: (Number(item.salTotalDesc)).toFixed(2),
+      TotalPayment: item.TotalPayment,
+      client: {
+        firstName: item.cliFirstName,
+        lastName: item.cliLastName,
+        id: item.cliKey,
+        rute: item.rutName
+      }
+    }
+  })
+
+
+  return sales
+}
+
 const GetCurrentSales = async () => {
   const userId = GetCurrentUserId()
   const currentSales = await prisma.sales.findMany({
@@ -20,26 +54,29 @@ const GetCurrentSales = async () => {
 
 }
 export const GetSalesById = async (salId) => {
-  const currentSale = await prisma.sales.findFirst({
-    where: { salId: salId }, include: {
-      salesdetails: {
-        include: {
-          products: true
-        }
-      },
-    },
+  const currentSale = await prisma.salesview.findFirst({
+    where: { salId: Number(salId) },
+  })
 
-  }
-  )
   let salesNote = null
   if (currentSale != null) {
+
     const client = await prisma.clients.findFirst({ where: { cliId: currentSale.salCliId }, include: { Rutes: true } })
+    const salesDetails = await prisma.salesdetails.findMany({
+      where: { sadSalId: Number(salId), sadDeleted: FALSE },
+      include: {
+        products: true
+      },
+    })
     salesNote = {
       id: currentSale.salId,
-      total: (Number(currentSale.salTotal)).toFixed(2),
+      date: currentSale.salDate,
+      totalPayment: currentSale.totalPayment,
+      total: (Number(currentSale.total)).toFixed(2),
       descuento: currentSale.salDescuento,
-      totalWithDesc: (Number(currentSale.salTotalWithDesc)).toFixed(2),
-      totalDesc: (Number(currentSale.salTotalDesc)).toFixed(2),
+      totalWithDesc: (Number(currentSale.totalWithDesc)).toFixed(2),
+      totalDesc: (Number(currentSale.totalDesc)).toFixed(2),
+      due: (Number(currentSale.due)).toFixed(2),
       client: {
         firstName: client.cliFirstName,
         lastName: client.cliLastName,
@@ -48,7 +85,8 @@ export const GetSalesById = async (salId) => {
       },
       salesdetails: []
     }
-    currentSale.salesdetails.map(detail => {
+
+    salesDetails.map(detail => {
       if (!detail.sadDeleted) {
         salesNote.salesdetails.push({
           id: detail.sadKey,
@@ -76,6 +114,21 @@ export const GetCurrentNoteSalesByUser = async () => {
 
 
   return noteSales;
+}
+export const DeleteNoteSalesById = async (salId) => {
+  const userId = GetCurrentUserId()
+  const ComId = GetEmpresaIdByUser(userId)
+
+  const salesUpdated = await prisma.sales.updateMany({ where: { salId: Number(salId) }, data: { salDeleted: TRUE, salClose: TRUE } })
+  const salesDetailsUpdated = await prisma.salesdetails.updateMany({ where: { sadSalId: Number(salId) }, data: { sadDeleted: TRUE } })
+  return GetSalesById(Number(salId))
+}
+export const DeleteNoteSales = async () => {
+  const userId = GetCurrentUserId()
+  const ComId = GetEmpresaIdByUser(userId)
+  const currentSales = await GetCurrentSales()
+  const salesUpdated = await prisma.sales.updateMany({ where: { salId: currentSales.salId }, data: { salDeleted: TRUE, salClose: TRUE } })
+  const salesDetailsUpdated = await prisma.salesdetails.updateMany({ where: { sadSalId: currentSales.salId }, data: { sadDeleted: TRUE } })
 }
 /*
 export const Get = async (req, res) =>
@@ -239,3 +292,4 @@ export const saveDescount = async (percentage = 0) => {
   }
   return noteSales
 }
+

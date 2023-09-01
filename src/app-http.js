@@ -23,7 +23,17 @@ export const appHttp = (app) => {
     app.use('/api/', routes.sessionRoute);
     app.use('/api/', routes.userRoute);
     app.use('/api/', routes.activesRoute);
-    app.use('/pdf', routes.ReportsRoute);
+    app.use('/api/', routes.paymentsRoute);
+    app.use('/pdf', routes.RptClientsRoute);
+    app.use('/pdf', routes.RptEmployeesRoute);
+    app.use('/pdf', routes.RptProductsRoute);
+    app.use('/pdf', routes.RptProvidersRoute);
+    app.use('/pdf', routes.RptPurchasesRoute);
+    app.use('/pdf', routes.RptSalesRoute);
+    app.use('/pdf', routes.RptUserRoute);
+    app.use('/pdf', routes.RptactivesRoute);
+
+
 
 
 

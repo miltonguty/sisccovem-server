@@ -2,8 +2,7 @@
 import { FALSE, TRUE } from "../constants.js";
 import prisma from "../lib/prisma.js";
 import { GetEmpresaIdByUser } from "../lib/utils.js";
-export const
-  get = async ({ firstName, lastName, email, phone, pageSize, page }) => {
+export const  get = async ({ firstName, lastName, email, phone, pageSize, page }) => {
     const comId = GetEmpresaIdByUser()
     let filter = {
       skip: Number(page * pageSize),
@@ -51,14 +50,15 @@ export const
     if (orConditions.length > 0) {
       filter.where.OR = orConditions
     }
-    const clients = await prisma.clients.findMany(filter);
+    const clients = await prisma.clientsview.findMany(filter);
     const result = clients.map(item =>
     ({
       id: item.cliKey,
       firstName: item.cliFirstName,
       lastName: item.cliLastName,
       email: item.cliEmail,
-      phone: item.cliPhone
+      phone: item.cliPhone,
+      deuda: item.deuda
     }))
     return result
 
@@ -85,12 +85,33 @@ export const getById = async (key, ignoreDeleted = FALSE) => {
     const Client = await prisma.clients.findFirst({
       where: where,
     });
+    const notes = await prisma.salesview.findMany({
+      where: {
+        salCliId: Client.cliId,
+        due: { gt: 0 }
+      }
+    })
+    const notesdue = notes.map(item => {
+      return {
+        id: item.salId,
+        date: item.salDate,
+        salCliId: item.salCliId,
+        total: item.total,
+        totalDesc: item.totalDesc,
+        totalWithDesc: item.totalWithDesc,
+        TotalPayment: item.TotalPayment,
+        due: item.due,
+      }
+    }
+
+    )
     result = {
       id: Client.cliKey,
       firstName: Client.cliFirstName,
       lastName: Client.cliLastName,
       email: Client.cliEmail,
-      phone: Client.cliPhone
+      phone: Client.cliPhone,
+      notesDue: notesdue
     }
   }
   return result;

@@ -78,3 +78,12 @@ export function SetFilterSections ({ page, pageSize, name, description }) {
     }
     return filter
 }
+export function SetFilterPurchase ({ page, pageSize, number }) {
+
+    const filter = {
+        page: page ? page - 1 : 0,
+        number,
+        pageSize: pageSize ? pageSize : Number.MAX_SAFE_INTEGER
+    }
+    return filter
+}
