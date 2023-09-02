@@ -1,13 +1,17 @@
 import express from 'express';
 import { add, asignItem, get, getActivesFree, getById, remove, update } from '../../controller/actives.js';
 import { SetFilterActives } from '../../lib/Filters.js';
+import { GetSessionById } from '../../sessions.js';
+import { GetCurrentUserId } from '../../lib/utils.js';
 
 var router = express.Router();
 
 router.get('/actives', async function(req, res) {
     try {
         const filter = SetFilterActives(req.query)
-        const result = await get(filter);
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await get(filter, currentUserId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -18,7 +22,9 @@ router.get('/actives', async function(req, res) {
 router.get("/actives/itemsFree", async function(req, res) {
     try {
         const filter = SetFilterActives(req.query)
-        const result = await getActivesFree(filter);
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await getActivesFree(filter, currentUserId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -29,8 +35,9 @@ router.get("/actives/itemsFree", async function(req, res) {
 router.put('/actives/asingItem', async function(req, res) {
     try {
         const { clientId, activeId } = req.body;
-
-        const result = await asignItem({ clientId, activeId });
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await asignItem({ clientId, activeId }, currentUserId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -41,7 +48,9 @@ router.put('/actives/asingItem', async function(req, res) {
 router.post('/actives', async function(req, res) {
     try {
         const { codigo, description } = req.body;
-        const result = await add({ codigo, description });
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await add({ codigo, description }, currentUserId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -54,7 +63,9 @@ router.put('/actives/:id', async function(req, res) {
 
         const { id } = req.params;
         const { codigo, description } = req.body;
-        const result = await update({ id, codigo, description });
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await update({ id, codigo, description }, currentUserId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -65,7 +76,9 @@ router.put('/actives/:id', async function(req, res) {
 router.get('/actives/:actId', async function(req, res) {
     try {
         const { actId } = req.params;
-        const result = await getById(actId);
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await getById(actId, currentUserId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -76,7 +89,9 @@ router.get('/actives/:actId', async function(req, res) {
 router.delete('/actives/:actId', async function(req, res) {
     try {
         const { actId } = req.params;
-        const result = await remove(actId);
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await remove(actId, currentUserId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)

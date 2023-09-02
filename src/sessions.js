@@ -4,9 +4,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { MessageError } from './lib/utils.js';
 var storeSessions = new Map()
 
-export const AddSession = (userName, password) => {
+export const AddSession = ({ userId, companyId, userName, password }) => {
     const IdSession = uuidv4()
-    storeSessions.set(IdSession, { userName, password, date: Date.now() })
+    storeSessions.set(IdSession, { userId, companyId, userName, password, date: Date.now() })
     return IdSession
 }
 export const RemoveSession = (sessionId) => {

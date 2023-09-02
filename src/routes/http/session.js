@@ -9,7 +9,7 @@ router.post('/Login', async function(req, res) {
         const { userName, password } = req.body
         const userResult = await login(userName, password)
         if (userResult) {
-            const IdSession = AddSession({ userName, password })
+            const IdSession = AddSession({ userId: userResult.id, companyId: userResult.company.id, userName, password })
 
             res.status(200).json({ tokenSession: IdSession, ...userResult });
         }

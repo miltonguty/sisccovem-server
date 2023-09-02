@@ -2,15 +2,14 @@
 import { FALSE, TRUE } from "../constants.js";
 import prisma from "../lib/prisma.js";
 import { GetEmpresaIdByUser } from "../lib/utils.js";
-export const get = async ({ firstName, lastName, email, phone, pageSize, page }) => {
-
-
-
+export const get = async ({ firstName, lastName, email, phone, pageSize, page }, currentUserId) => {
+  const comId = GetEmpresaIdByUser(currentUserId)
   let filter = {
     skip: Number(page * pageSize),
     take: Number(pageSize),
     where: {
-      empDeleted: FALSE
+      empDeleted: FALSE,
+      empComId: comId
     }
   }
   const orConditions = []
@@ -68,7 +67,7 @@ export const get = async ({ firstName, lastName, email, phone, pageSize, page })
   return result
 
 };
-export const getById = async (key, ignoreDeleted = FALSE) => {
+export const getById = async (key, ignoreDeleted = FALSE, currentUserId) => {
   let result = null
   if (key) {
     const comId = GetEmpresaIdByUser()
@@ -101,7 +100,7 @@ export const getById = async (key, ignoreDeleted = FALSE) => {
   return result;
 
 };
-export const add = async ({ firstName, lastName, email, phone, salary }) => {
+export const add = async ({ firstName, lastName, email, phone, salary }, currentUserId) => {
 
   const comId = GetEmpresaIdByUser()
 
@@ -115,7 +114,7 @@ export const add = async ({ firstName, lastName, email, phone, salary }) => {
   return employeeResult;
 
 };
-export const update = async ({ id, firstName, lastName, email, phone, salary }) => {
+export const update = async ({ id, firstName, lastName, email, phone, salary }, currentUserId) => {
 
   const EmployeeUpdate = await prisma.employees.updateMany({
     where: { empKey: id },
@@ -128,7 +127,7 @@ export const update = async ({ id, firstName, lastName, email, phone, salary }) 
   return employeeResult;
 
 };
-export const remove = async (empKey) => {
+export const remove = async (empKey, currentUserId) => {
   const EmployeeDelete = await prisma.employees.updateMany({
     where: { empKey: empKey }, data: {
       empDeleted: TRUE

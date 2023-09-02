@@ -1,11 +1,14 @@
 import express from 'express';
 import { add, getPaymentsBySalesId, remove } from '../../controller/payments.js';
+import { GetCurrentUserId } from '../../lib/utils.js';
 
 var router = express.Router();
 router.post('/payments', async function(req, res) {
     try {
         const { noteSalesId, mount } = req.body;
-        const result = await add( {noteSalesId, mount });
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await add({ noteSalesId, mount }, currentUserId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -17,7 +20,9 @@ router.post('/payments', async function(req, res) {
 router.get('/payments/BySalesId/:salId', async function(req, res) {
     try {
         const { salId } = req.params;
-        const result = await getPaymentsBySalesId(salId);
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await getPaymentsBySalesId(salId, currentUserId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -28,7 +33,9 @@ router.get('/payments/BySalesId/:salId', async function(req, res) {
 router.delete('/payments/:payId', async function(req, res) {
     try {
         const { payId } = req.params;
-        const result = await remove(payId);
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await remove(payId, currentUserId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)

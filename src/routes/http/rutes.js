@@ -1,13 +1,16 @@
 import express from 'express';
 import { add, get, getById, remove, update } from '../../controller/Rutes.js';
 import { SetFilterRutes } from '../../lib/Filters.js';
+import { GetCurrentUserId } from '../../lib/utils.js';
 
 var router = express.Router();
 
 router.get('/rutes', async function(req, res) {
     try {
         const filter = SetFilterRutes(req.query)
-        const result = await get(filter);
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await get(filter, currentUserId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -19,7 +22,9 @@ router.get('/rutes', async function(req, res) {
 router.post('/rutes', async function(req, res) {
     try {
         const { codigo, description } = req.body;
-        const result = await add({ codigo, description });
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await add({ codigo, description }, currentUserId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -32,7 +37,9 @@ router.put('/rutes/:id', async function(req, res) {
 
         const { id } = req.params;
         const { name, description } = req.body;
-        const result = await update({ id, name, description });
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await update({ id, name, description }, currentUserId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -43,7 +50,9 @@ router.put('/rutes/:id', async function(req, res) {
 router.get('/rutes/:rutId', async function(req, res) {
     try {
         const { rutId } = req.params;
-        const result = await getById(rutId);
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await getById(rutId, currentUserId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -54,7 +63,9 @@ router.get('/rutes/:rutId', async function(req, res) {
 router.delete('/rutes/:rutId', async function(req, res) {
     try {
         const { rutId } = req.params;
-        const result = await remove(rutId);
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await remove(rutId, currentUserId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)

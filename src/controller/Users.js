@@ -13,9 +13,9 @@ export const login = async (userName, password) => {
         }
     })
     if (userResult.length > 0) {
-        
+
         return {
-            
+
             name: userResult[0].useName,
             email: userResult[0].useEmail,
             company: {
@@ -24,59 +24,58 @@ export const login = async (userName, password) => {
                 address: userResult[0].companys.comAddress,
                 id: userResult[0].companys.comKey
             },
-            id: userResult[0].useKey
+            id: userResult[0].useId
         }
     }
     return null
 }
-export const
-    get = async ({ userName, email, pageSize, page }) => {
-        const comId = GetEmpresaIdByUser()
-        let filter = {
-            skip: Number(page * pageSize),
-            take: Number(pageSize),
-            where: {
-                useComId: comId,
-                useDeleted: FALSE
-            }
+export const get = async ({ userName, email, pageSize, page }, currentUserId) => {
+    const comId = GetEmpresaIdByUser(currentUserId)
+    let filter = {
+        skip: Number(page * pageSize),
+        take: Number(pageSize),
+        where: {
+            useComId: comId,
+            useDeleted: FALSE,
+            useComId: comId
         }
-        const orConditions = []
-        if (userName) {
-            orConditions.push(
-                {
-                    useName: {
-                        contains: userName,
-                    }
-                })
-        }
-        if (email) {
-            orConditions.push(
-                {
-                    useEmail: {
-                        contains: email,
-                    }
-                })
-        }
-        if (orConditions.length > 0) {
-            filter.where.OR = orConditions
-        }
-        const users = await prisma.users.findMany(filter);
-        const result = users.map(item =>
-        ({
-            id: item.useKey,
-            userName: item.useName,
-            email: item.useEmail
+    }
+    const orConditions = []
+    if (userName) {
+        orConditions.push(
+            {
+                useName: {
+                    contains: userName,
+                }
+            })
+    }
+    if (email) {
+        orConditions.push(
+            {
+                useEmail: {
+                    contains: email,
+                }
+            })
+    }
+    if (orConditions.length > 0) {
+        filter.where.OR = orConditions
+    }
+    const users = await prisma.users.findMany(filter);
+    const result = users.map(item =>
+    ({
+        id: item.useKey,
+        userName: item.useName,
+        email: item.useEmail
 
-        }))
-        return result
+    }))
+    return result
 
-    };
-export const getById = async (key, ignoreDeleted = FALSE) => {
-
+};
+export const getById = async (key, ignoreDeleted = FALSE, currentUserId) => {
+    const comId = GetEmpresaIdByUser(currentUserId)
 
     let result = null
     if (key) {
-        const comId = GetEmpresaIdByUser()
         let where = {}
         if (ignoreDeleted) {
             where = {
@@ -103,8 +102,8 @@ export const getById = async (key, ignoreDeleted = FALSE) => {
 
 
 };
-export const add = async (user) => {
-    const comId = GetEmpresaIdByUser()
+export const add = async (user, currentUserId) => {
+    const comId = GetEmpresaIdByUser(currentUserId)
     const userCreated = await prisma.users.create({
         data: {
             useName: user.userName,
@@ -113,13 +112,14 @@ export const add = async (user) => {
             useComId: comId
         },
     });
-    const userResult = await getById(userCreated.useKey)
+    const userResult = await getById(userCreated.useKey, currentUserId)
     return userResult;
 
 };
-export const update = async ({ id, name, email }) => {
+export const update = async ({ id, name, email }, currentUserId) => {
+    const comId = GetEmpresaIdByUser(currentUserId)
     const userUpdate = await prisma.users.updateMany({
-        where: { useKey: id },
+        where: { useKey: id, useComId: comId },
         data: {
             useName: name,
             useEmail: email
@@ -128,16 +128,16 @@ export const update = async ({ id, name, email }) => {
     const userResult = await getById(userUpdate.useKey)
     return userResult
 };
-export const remove = async (useKey) => {
-    const comId = GetEmpresaIdByUser()
+export const remove = async (useKey, currentUserId) => {
+    const comId = GetEmpresaIdByUser(currentUserId)
     const useentDelete = await prisma.users.updateMany({
         where: {
-            useKey: useKey
+            useKey: useKey, useComId: comId
         }, data: {
             useDeleted: TRUE
         }
     });
-    const userResult = await getById(useKey, TRUE)
+    const userResult = await getById(useKey, TRUE, currentUserId)
     return userResult;
 
 };

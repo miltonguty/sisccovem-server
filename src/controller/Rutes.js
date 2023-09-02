@@ -1,13 +1,13 @@
 /*** CONTROLLER*/
 import { FALSE, TRUE } from "../constants.js";
 import prisma from "../lib/prisma.js";
-export const get = async ({ name, description, pageSize, page }) => {
-
+export const get = async ({ name, description, pageSize, page }, currentUserId) => {
+  const comId = GetEmpresaIdByUser(currentUserId)
   let filter = {
     skip: Number(page * pageSize),
     take: Number(pageSize),
     where: {
-      rutDeleted: FALSE
+      rutDeleted: FALSE, rutComId: comId
     }
   }
   const orConditions = []
@@ -44,17 +44,20 @@ export const get = async ({ name, description, pageSize, page }) => {
   return result;
 
 };
-export const getById = async (rutKey, ignoreDeleted = FALSE) => {
+export const getById = async (rutKey, ignoreDeleted = FALSE, currentUserId) => {
+  const comId = GetEmpresaIdByUser(currentUserId)
   if (rutKey) {
     let where = {}
     if (ignoreDeleted) {
       where = {
-        rutKey: rutKey
+        rutKey: rutKey,
+        rutComId: comId
       }
     } else {
       where = {
         rutKey: rutKey,
-        rutDeleted: FALSE
+        rutDeleted: FALSE,
+        rutComId: comId
       }
     }
     const rute = await prisma.rutes.findFirst({
@@ -72,34 +75,34 @@ export const getById = async (rutKey, ignoreDeleted = FALSE) => {
     return null
   }
 }
-export const add = async ({ name, description }) => {
-
+export const add = async ({ name, description }, currentUserId) => {
+  const comId = GetEmpresaIdByUser(currentUserId)
   const rute = await prisma.rutes.create({
-    data: { rutName: name, rutDescription: description },
+    data: { rutName: name, rutDescription: description, rutComId: comId },
   });
-  const ruteResult = await getById(rute.rutKey)
+  const ruteResult = await getById(rute.rutKey, currentUserId)
   return ruteResult;
 
 };
-export const update = async ({ id, name, description }) => {
-
+export const update = async ({ id, name, description }, currentUserId) => {
+  const comId = GetEmpresaIdByUser(currentUserId)
   const ruteUpdate = await prisma.rutes.updateMany({
-    where: { rutKey: id },
+    where: { rutKey: id, rutComId: comId },
     data: { rutName: name, rutDescription: description },
   });
-  const ruteResult = await getById(ruteUpdate.rutKey)
+  const ruteResult = await getById(ruteUpdate.rutKey, currentUserId)
   return ruteResult
 
 };
-export const remove = async (rutKey) => {
-
+export const remove = async (rutKey, currentUserId) => {
+  const comId = GetEmpresaIdByUser(currentUserId)
 
   const ruteDelete = await prisma.rutes.updateMany({
-    where: { rutKey: rutKey }, data: {
+    where: { rutKey: rutKey, rutComId: comId }, data: {
       rutDeleted: TRUE
     }
   });
-  const ruteResult = await getById(rutKey, TRUE)
+  const ruteResult = await getById(rutKey, TRUE, currentUserId)
   return ruteResult
 
 };

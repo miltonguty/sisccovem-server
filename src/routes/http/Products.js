@@ -1,12 +1,15 @@
 import express, { json } from 'express';
 import { add, get, getById, remove } from '../../controller/Products.js';
 import { SetFilterProduct } from '../../lib/Filters.js';
+import { GetCurrentUserId } from '../../lib/utils.js';
 var router = express.Router();
 router.get('/Products', async function(req, res) {
     try {
 
         const filter = SetFilterProduct(req.query)
-        const result = await get(filter);
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await get(filter, currentUserId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -17,7 +20,9 @@ router.get('/Products', async function(req, res) {
 router.post('/Products', async function(req, res) {
     try {
         const { description, priceSales, pricePurchase, image, supId } = req.body;
-        const result = await add({ description, priceSales, pricePurchase, image, supId });
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await add({ description, priceSales, pricePurchase, image, supId }, currentUserId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -28,7 +33,9 @@ router.post('/Products', async function(req, res) {
 router.put('/Products', async function(req, res) {
     try {
         const { id, description, priceSales, pricePurchase, image, supId, stock } = req.body;
-        const result = await update({ id, description, priceSales, pricePurchase, image, supId, stock });
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await update({ id, description, priceSales, pricePurchase, image, supId, stock }, currentUserId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -39,7 +46,9 @@ router.put('/Products', async function(req, res) {
 router.get('/Products/:proId', async function(req, res) {
     try {
         const { proId } = req.params
-        const result = await getById(proId);
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await getById(proId, currentUserId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -50,7 +59,9 @@ router.get('/Products/:proId', async function(req, res) {
 router.delete('/Products/:proId', async function(req, res) {
     try {
         const { proId } = req.params
-        const result = await remove(proId);
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await remove(proId, currentUserId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)

@@ -1,13 +1,13 @@
 /*** CONTROLLER*/
 import { FALSE, TRUE } from "../constants.js";
 import prisma from "../lib/prisma.js";
-export const get = async ({ name, description, pageSize, page }) => {
-
+export const get = async ({ name, description, pageSize, page }, currentUserId) => {
+  const comId = GetEmpresaIdByUser(currentUserId)
   let filter = {
     skip: Number(page * pageSize),
     take: Number(pageSize),
     where: {
-      secDeleted: FALSE
+      secDeleted: FALSE, secComId: comId
     }
   }
   const orConditions = []
@@ -44,12 +44,14 @@ export const get = async ({ name, description, pageSize, page }) => {
   return result;
 
 };
-export const getById = async (secKey, ignoreDeleted = FALSE) => {
+export const getById = async (secKey, ignoreDeleted = FALSE, currentUserId) => {
+  const comId = GetEmpresaIdByUser(currentUserId)
   if (secKey) {
     let where = {}
     if (ignoreDeleted) {
       where = {
-        secKey: secKey
+        secKey: secKey,
+        secComId: comId
       }
     } else {
       where = {
@@ -72,34 +74,34 @@ export const getById = async (secKey, ignoreDeleted = FALSE) => {
     return null
   }
 }
-export const add = async ({ name, description }) => {
-
+export const add = async ({ name, description }, currentUserId) => {
+  const comId = GetEmpresaIdByUser(currentUserId)
   const sece = await prisma.seces.create({
-    data: { secName: name, secDescription: description },
+    data: { secName: name, secDescription: description, secComId: comId },
   });
-  const seceResult = await getById(sece.secKey)
+  const seceResult = await getById(sece.secKey, currentUserId)
   return seceResult;
 
 };
-export const update = async ({ id, name, description }) => {
-
+export const update = async ({ id, name, description }, currentUserId) => {
+  const comId = GetEmpresaIdByUser(currentUserId)
   const seceUpdate = await prisma.seces.updateMany({
-    where: { secKey: id },
+    where: { secKey: id, secComId: comId },
     data: { secName: name, secDescription: description },
   });
-  const seceResult = await getById(seceUpdate.secKey)
+  const seceResult = await getById(seceUpdate.secKey, currentUserId)
   return seceResult
 
 };
-export const remove = async (secKey) => {
-
+export const remove = async (secKey, currentUserId) => {
+  const comId = GetEmpresaIdByUser(currentUserId)
 
   const seceDelete = await prisma.seces.updateMany({
-    where: { secKey: secKey }, data: {
+    where: { secKey: secKey, secComId: comId }, data: {
       secDeleted: TRUE
     }
   });
-  const seceResult = await getById(secKey, TRUE)
+  const seceResult = await getById(secKey, TRUE, currentUserId)
   return seceResult
 
 };

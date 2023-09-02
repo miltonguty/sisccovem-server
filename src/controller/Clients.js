@@ -2,73 +2,73 @@
 import { FALSE, TRUE } from "../constants.js";
 import prisma from "../lib/prisma.js";
 import { GetEmpresaIdByUser } from "../lib/utils.js";
-export const  get = async ({ firstName, lastName, email, phone, pageSize, page }) => {
-    const comId = GetEmpresaIdByUser()
-    let filter = {
-      skip: Number(page * pageSize),
-      take: Number(pageSize),
-      where: {
-        cliComId: comId,
-        cliDeleted: FALSE
-      }
+export const get = async ({ firstName, lastName, email, phone, pageSize, page }, currentUserId) => {
+  const comId = GetEmpresaIdByUser( currentUserId)
+  let filter = {
+    skip: Number(page * pageSize),
+    take: Number(pageSize),
+    where: {
+      cliComId: comId,
+      cliDeleted: FALSE
     }
-    const orConditions = []
-    if (firstName) {
-      orConditions.push(
-        {
-          cliFirstName: {
-            contains: firstName,
-          }
-        })
-    }
-
-    if (lastName) {
-      orConditions.push(
-        {
-          cliLastName: {
-            contains: lastName,
-          }
-        })
-    }
-    if (email) {
-      orConditions.push(
-        {
-          cliEmail: {
-            contains: email,
-          }
+  }
+  const orConditions = []
+  if (firstName) {
+    orConditions.push(
+      {
+        cliFirstName: {
+          contains: firstName,
         }
-      )
-    }
-    if (phone) {
-      orConditions.push(
-        {
-          cliPhone: {
-            contains: phone,
-          }
-        })
-    }
-    if (orConditions.length > 0) {
-      filter.where.OR = orConditions
-    }
-    const clients = await prisma.clientsview.findMany(filter);
-    const result = clients.map(item =>
-    ({
-      id: item.cliKey,
-      firstName: item.cliFirstName,
-      lastName: item.cliLastName,
-      email: item.cliEmail,
-      phone: item.cliPhone,
-      deuda: item.deuda
-    }))
-    return result
+      })
+  }
 
-  };
-export const getById = async (key, ignoreDeleted = FALSE) => {
+  if (lastName) {
+    orConditions.push(
+      {
+        cliLastName: {
+          contains: lastName,
+        }
+      })
+  }
+  if (email) {
+    orConditions.push(
+      {
+        cliEmail: {
+          contains: email,
+        }
+      }
+    )
+  }
+  if (phone) {
+    orConditions.push(
+      {
+        cliPhone: {
+          contains: phone,
+        }
+      })
+  }
+  if (orConditions.length > 0) {
+    filter.where.OR = orConditions
+  }
+  const clients = await prisma.clientsview.findMany(filter);
+  const result = clients.map(item =>
+  ({
+    id: item.cliKey,
+    firstName: item.cliFirstName,
+    lastName: item.cliLastName,
+    email: item.cliEmail,
+    phone: item.cliPhone,
+    deuda: item.deuda
+  }))
+  return result
+
+};
+export const getById = async (key, ignoreDeleted = FALSE, currentUserId) => {
 
 
   let result = null
   if (key) {
-    const comId = GetEmpresaIdByUser()
+    const comId = GetEmpresaIdByUser(currentUserId)
     let where = {}
     if (ignoreDeleted) {
       where = {
@@ -118,10 +118,10 @@ export const getById = async (key, ignoreDeleted = FALSE) => {
 
 
 };
-export const add = async (client) => {
+export const add = async (client, currentUserId) => {
 
 
-  const comId = GetEmpresaIdByUser()
+  const comId = GetEmpresaIdByUser( currentUserId)
   const Client = await prisma.clients.create({
     data: {
       cliFirstName: client.firstName,
@@ -131,11 +131,11 @@ export const add = async (client) => {
       cliComId: comId
     },
   });
-  const clientResult = await getById(Client.CliKey)
+  const clientResult = await getById(Client.CliKey, currentUserId)
   return clientResult;
 
 };
-export const update = async ({ id, firstName, lastName, email, phone }) => {
+export const update = async ({ id, firstName, lastName, email, phone }, currentUserId) => {
   const ClientUpdate = await prisma.clients.updateMany({
     where: { cliKey: id },
     data: {
@@ -148,7 +148,7 @@ export const update = async ({ id, firstName, lastName, email, phone }) => {
   const clientResult = await getById(ClientUpdate.CliKey)
   return clientResult
 };
-export const remove = async (cliKey) => {
+export const remove = async (cliKey, currentUserId) => {
   const comId = GetEmpresaIdByUser()
   const ClientDelete = await prisma.clients.updateMany({
     where: {
@@ -157,7 +157,7 @@ export const remove = async (cliKey) => {
       cliDeleted: TRUE
     }
   });
-  const clientResult = await getById(cliKey, TRUE)
+  const clientResult = await getById(cliKey, TRUE, currentUserId)
   return clientResult;
 
 };

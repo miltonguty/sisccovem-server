@@ -2,11 +2,11 @@
 import { FALSE, TRUE } from "../constants.js";
 import prisma from "../lib/prisma.js";
 
-import { GetCurrentUserId } from "../lib/utils.js";
+import { GetCurrentUserId, GetEmpresaIdByUser } from "../lib/utils.js";
 import { GetCurrentNoteSalesByUser } from "./Sales.js";
 
 
-export const getById = async (sadKey) => {
+export const getById = async (sadKey, currentUserId) => {
   if (sadKey) {
 
 
@@ -31,13 +31,14 @@ export const getById = async (sadKey) => {
     }
   }
 }
-export const addUpdate = async (proKey, count) => {
-
+export const addUpdate = async (proKey, count, currentUserId) => {
+  const comId = GetEmpresaIdByUser(currentUserId)
   const product = await prisma.products.findFirst({
-    where: { proKey: proKey },
+
+    where: { proKey: proKey, proComId: comId },
   });
-  let currentSalesNote = await GetCurrentNoteSalesByUser()
-  const userId = GetCurrentUserId()
+  let currentSalesNote = await GetCurrentNoteSalesByUser(currentUserId)
+
   const SalesDetail = await prisma.salesdetails.findFirst({
     where: {
       sadProdId: product.proId,
@@ -70,7 +71,7 @@ export const addUpdate = async (proKey, count) => {
         sadProdPrice: Number(product.proPriceSales),
         sadProdDescription: product.proDescription,
         sadProdCount: Number(count),
-        sadUseId: Number(userId),
+        sadUseId: Number(currentUserId),
         sadSalId: Number(currentSalesNote.id),
         sadSubTotal: (Number(product.proPriceSales) * Number(count)),
         salLastItem: TRUE
@@ -78,13 +79,13 @@ export const addUpdate = async (proKey, count) => {
     })
   }
 
-  var detail = await getById(SalesDetailUpdate.sadKey)
+  var detail = await getById(SalesDetailUpdate.sadKey, currentUserId)
 
 
   return detail
 
 }
-export const remove = async (sadKey) => {
+export const remove = async (sadKey, currentUserId) => {
   const SalesDetaiCount = await prisma.salesdetails.updateMany({
     where: { sadKey: sadKey },
     data: { sadDeleted: TRUE },

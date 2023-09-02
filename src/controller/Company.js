@@ -1,7 +1,7 @@
 /*** CONTROLLER*/
 import { FALSE, TRUE } from "../constants.js";
 import prisma from "../lib/prisma.js";
-export const get = async ({ name, phone, address, pageSize, page }) => {
+export const get = async ({ name, phone, address, pageSize, page }, currentUserId) => {
 
   let filter = {
     skip: Number(page * pageSize),
@@ -53,8 +53,8 @@ export const get = async ({ name, phone, address, pageSize, page }) => {
   return result;
 
 };
-export const getById = async (comKey, ignoreDeleted = FALSE) => {
-if (comKey) {
+export const getById = async (comKey, ignoreDeleted = FALSE, currentUserId) => {
+  if (comKey) {
     let where = {}
     if (ignoreDeleted) {
       where = {
@@ -81,26 +81,26 @@ if (comKey) {
     return null
   }
 }
-export const add = async ({ name, phone, address }) => {
+export const add = async ({ name, phone, address }, currentUserId) => {
 
   const company = await prisma.companys.create({
     data: { comName: name, comPhone: phone, comAddress: address },
   });
-  const companyResult = await getById(company.ComKey)
+  const companyResult = await getById(company.ComKey, currentUserId)
   return companyResult;
 
 };
-export const update = async ({ id, name, phone, address }) => {
+export const update = async ({ id, name, phone, address }, currentUserId) => {
 
   const companyUpdate = await prisma.companys.updateMany({
     where: { comKey: id },
     data: { comName: name, comPhone: phone, comAddress: address },
   });
-  const companyResult = await getById(companyUpdate.ComKey)
+  const companyResult = await getById(companyUpdate.ComKey, currentUserId)
   return companyResult
 
 };
-export const remove = async (comKey) => {
+export const remove = async (comKey, currentUserId) => {
 
 
   const companyDelete = await prisma.companys.updateMany({
@@ -108,7 +108,7 @@ export const remove = async (comKey) => {
       comDeleted: TRUE
     }
   });
-  const companyResult = await getById(comKey, TRUE)
+  const companyResult = await getById(comKey, TRUE, currentUserId)
   return companyResult
 
 };

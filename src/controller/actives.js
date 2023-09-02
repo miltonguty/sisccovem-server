@@ -2,9 +2,9 @@
 import { FALSE, TRUE } from "../constants.js";
 import prisma from "../lib/prisma.js";
 import { GetEmpresaIdByUser } from "../lib/utils.js";
-import { getById as getClientById } from "./Clients.js"
-export const get = async ({ codigo, description, cliId, maintenice, pageSize, page }) => {
-  const comId = GetEmpresaIdByUser()
+
+export const get = async ({ codigo, description, cliId, maintenice, pageSize, page }, currentUserId) => {
+  const comId = GetEmpresaIdByUser(currentUserId)
   let filter = {
     skip: Number(page * pageSize),
     take: Number(pageSize),
@@ -71,12 +71,12 @@ export const get = async ({ codigo, description, cliId, maintenice, pageSize, pa
   return result
 
 };
-export const getById = async (key, ignoreDeleted = FALSE) => {
+export const getById = async (key, ignoreDeleted = FALSE, currentUserId) => {
 
 
   let result = null
   if (key) {
-    const comId = GetEmpresaIdByUser()
+    const comId = GetEmpresaIdByUser(currentUserId)
     let where = {}
     if (ignoreDeleted) {
       where = {
@@ -108,10 +108,8 @@ export const getById = async (key, ignoreDeleted = FALSE) => {
 
 
 };
-export const add = async (active) => {
-
-
-  const comId = GetEmpresaIdByUser()
+export const add = async (active, currentUserId) => {
+  const comId = GetEmpresaIdByUser(currentUserId)
   const act = await prisma.actives.create({
     data: {
       actCodigo: active.codigo,
@@ -119,11 +117,11 @@ export const add = async (active) => {
       actComId: comId
     },
   });
-  const activeResult = await getById(act.actKey)
+  const activeResult = await getById(act.actKey, currentUserId)
   return activeResult;
 
 };
-export const update = async ({ id, codigo, description }) => {
+export const update = async ({ id, codigo, description }, currentUserId) => {
   const activeUpdate = await prisma.actives.updateMany({
     where: { actKey: id },
     data: {
@@ -131,11 +129,11 @@ export const update = async ({ id, codigo, description }) => {
       actDescription: description
     },
   });
-  const activeResult = await getById(activeUpdate.actKey)
+  const activeResult = await getById(activeUpdate.actKey, currentUserId)
   return activeResult
 };
-export const remove = async (actKey) => {
-  const comId = GetEmpresaIdByUser()
+export const remove = async (actKey, currentUserId) => {
+  const comId = GetEmpresaIdByUser(currentUserId)
   const activeDelete = await prisma.actives.updateMany({
     where: {
       actKey: actKey
@@ -143,11 +141,11 @@ export const remove = async (actKey) => {
       actDeleted: TRUE
     }
   });
-  const activeResult = await getById(actKey, TRUE)
+  const activeResult = await getById(actKey, TRUE, currentUserId)
   return activeResult;
 
 };
-export const asignItem = async ({ clientId = null, activeId }) => {
+export const asignItem = async ({ clientId = null, activeId }, currentUserId) => {
   let cliId = clientId
   if (clientId) {
     const client = await prisma.clients.findFirst({
@@ -163,10 +161,10 @@ export const asignItem = async ({ clientId = null, activeId }) => {
     },
   })
 
-  return getById(activeId)
+  return getById(activeId, currentUserId)
 }
-export const getActivesFree = async ({ codigo, description, cliId, maintenice, pageSize, page }) => {
-  const comId = GetEmpresaIdByUser()
+export const getActivesFree = async ({ codigo, description, cliId, maintenice, pageSize, page }, currentUserId) => {
+  const comId = GetEmpresaIdByUser(currentUserId)
   let filter = {
     skip: Number(page * pageSize),
     take: Number(pageSize),
