@@ -6,7 +6,9 @@ var router = express.Router();
 router.get('/reports/sales/NoteSales/:salesId', async function(req, res) {
     try {
         const { salesId } = req.params
-        const result = await rptNoteSalesById(salesId);
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await rptNoteSalesById(salesId, currentUserId);
         res.sendFile(result.filename);
     } catch (err) {
         console.log(err)

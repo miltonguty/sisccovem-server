@@ -6,9 +6,9 @@ import { GetEmpresaIdByUser } from "../../lib/utils.js";
 import { FALSE } from "../../constants.js";
 import prisma from "../../lib/prisma.js";
 import pdfCreator from "../../lib/pdfCreator.js";
-export const ActivesNoAssigned = async () => {
+export const ActivesNoAssigned = async (currentUserId) => {
     try {
-        const comId = GetEmpresaIdByUser()
+        const comId = GetEmpresaIdByUser(currentUserId)
         const filter = {
             where: {
                 actComId: comId,
@@ -37,9 +37,9 @@ export const ActivesNoAssigned = async () => {
 
     }
 };
-export const ActivesAssigned = async () => {
+export const ActivesAssigned = async (currentUserId) => {
     try {
-        const comId = GetEmpresaIdByUser()
+        const comId = GetEmpresaIdByUser(currentUserId)
         const filter = {
             where: {
                 cliComId: comId,
@@ -84,9 +84,9 @@ export const ActivesAssigned = async () => {
 
     }
 };
-export const ActivesList = async () => {
+export const ActivesList = async (currentUserId) => {
     try {
-        const comId = GetEmpresaIdByUser()
+        const comId = GetEmpresaIdByUser(currentUserId)
         const filter = {
             where: {
                 actComId: comId,

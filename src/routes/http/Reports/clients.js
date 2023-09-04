@@ -1,10 +1,13 @@
 import express, { json } from 'express';
 import { ClientsList } from '../../../controller/Reports/clients.js';
+import { GetCurrentUserId } from '../../../lib/utils.js';
 
 var router = express.Router();
 router.get('/reports/clients', async function(req, res) {
     try {
-        const result = await ClientsList();
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await ClientsList(currentUserId);
         res.sendFile(result.filename);
     } catch (err) {
         console.log(err)

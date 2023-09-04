@@ -3,10 +3,10 @@ import { GetEmpresaIdByUser } from "../../lib/utils.js";
 import { FALSE } from "../../constants.js";
 import prisma from "../../lib/prisma.js";
 import pdfCreator from "../../lib/pdfCreator.js";
-import {  GetSalesById } from "../Sales.js";
-export const rptNoteSalesById = async (id) => {
+import { GetSalesById } from "../Sales.js";
+export const rptNoteSalesById = async (id, currentUserId) => {
     try {
-        const comId = GetEmpresaIdByUser()
+        const comId = GetEmpresaIdByUser(currentUserId)
         const currentSalesNote = await GetSalesById(id)
 
         const company = await prisma.companys.findFirst(comId)

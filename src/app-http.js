@@ -8,10 +8,6 @@ export const appHttp = (app) => {
     app.use(bodyParser.json())
 
 
-    app.get('/', async (req, res) => {
-
-        res.json({ status: true, message: "**********************SISCCOVEM*************************" })
-    })
 
     //    app.use(session())
     app.use('/api/', routes.sessionRoute) //Login
@@ -37,6 +33,10 @@ export const appHttp = (app) => {
     app.use('/pdf', routes.RptSalesRoute)
     app.use('/pdf', routes.RptUserRoute)
     app.use('/pdf', routes.RptactivesRoute)
+    app.get('/*', async (req, res) => {
+
+        res.json({ status: true, message: "**********************SISCCOVEM*************************" })
+    })
 
 
 

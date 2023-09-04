@@ -1,6 +1,7 @@
 /*** CONTROLLER*/
 import { FALSE, TRUE } from "../constants.js";
 import prisma from "../lib/prisma.js";
+import { v4 as uuidv4 } from 'uuid';
 export const get = async ({ name, phone, address, pageSize, page }, currentUserId) => {
 
   let filter = {
@@ -53,7 +54,9 @@ export const get = async ({ name, phone, address, pageSize, page }, currentUserI
   return result;
 
 };
-export const getById = async (comKey, ignoreDeleted = FALSE, currentUserId) => {
+
+export const getById = async (comKey) => {
+  const ignoreDeleted = FALSE
   if (comKey) {
     let where = {}
     if (ignoreDeleted) {
@@ -84,7 +87,12 @@ export const getById = async (comKey, ignoreDeleted = FALSE, currentUserId) => {
 export const add = async ({ name, phone, address }, currentUserId) => {
 
   const company = await prisma.companys.create({
-    data: { comName: name, comPhone: phone, comAddress: address },
+    data: {
+      comKey: uuidv4(),
+      comName: name,
+      comPhone: phone,
+      comAddress: address
+    },
   });
   const companyResult = await getById(company.ComKey, currentUserId)
   return companyResult;
@@ -108,7 +116,7 @@ export const remove = async (comKey, currentUserId) => {
       comDeleted: TRUE
     }
   });
-  const companyResult = await getById(comKey, TRUE, currentUserId)
+  const companyResult = await getById(comKey,  currentUserId)
   return companyResult
 
 };

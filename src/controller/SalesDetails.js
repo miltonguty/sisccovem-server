@@ -2,26 +2,27 @@
 import { FALSE, TRUE } from "../constants.js";
 import prisma from "../lib/prisma.js";
 
-import { GetCurrentUserId, GetEmpresaIdByUser } from "../lib/utils.js";
+import {  GetEmpresaIdByUser } from "../lib/utils.js";
 import { GetCurrentNoteSalesByUser } from "./Sales.js";
-
+import { v4 as uuidv4 } from 'uuid';
 
 export const getById = async (sadKey, currentUserId) => {
   if (sadKey) {
 
 
     const SalesDetail = await prisma.salesdetails.findMany({
-      where: { sadKey: sadKey },
-      include: {
-        products: true
-      }
-    });
+      where: { sadKey: sadKey }
+    })
+
     if (SalesDetail.length >= 1) {
+      const product = await prisma.products.findFirst({
+        where: { proId: SalesDetail[0].sadProId }
+      })
       const result = {
         id: SalesDetail[0].sadKey,
-        prodId: SalesDetail[0].products.proKey,
-        description: SalesDetail[0].products.proDescription,
-        price: SalesDetail[0].products.proPriceSales,
+        prodId: product.proKey,
+        description: SalesDetail[0].sadProdDescription,
+        price: SalesDetail[0].sadProdPrice,
         count: SalesDetail[0].sadProdCount,
         subTotal: SalesDetail[0].sadSubTotal,
       }
@@ -32,7 +33,7 @@ export const getById = async (sadKey, currentUserId) => {
   }
 }
 export const addUpdate = async (proKey, count, currentUserId) => {
-  const comId = GetEmpresaIdByUser(currentUserId)
+  const comId = await GetEmpresaIdByUser(currentUserId)
   const product = await prisma.products.findFirst({
 
     where: { proKey: proKey, proComId: comId },
@@ -67,7 +68,9 @@ export const addUpdate = async (proKey, count, currentUserId) => {
   } else {
     SalesDetailUpdate = await prisma.salesdetails.create({
       data: {
+        sadKey: uuidv4(),
         sadProdId: Number(product.proId),
+        sadProdKey: product.proKey,
         sadProdPrice: Number(product.proPriceSales),
         sadProdDescription: product.proDescription,
         sadProdCount: Number(count),

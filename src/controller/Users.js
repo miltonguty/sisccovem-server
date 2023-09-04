@@ -1,7 +1,7 @@
 import { FALSE, TRUE } from "../constants.js"
 import prisma from "../lib/prisma.js"
 import { GetEmpresaIdByUser } from "../lib/utils.js"
-
+import { v4 as uuidv4 } from 'uuid';
 
 export const login = async (userName, password) => {
     const userResult = await prisma.users.findMany({
@@ -30,7 +30,7 @@ export const login = async (userName, password) => {
     return null
 }
 export const get = async ({ userName, email, pageSize, page }, currentUserId) => {
-    const comId = GetEmpresaIdByUser(currentUserId)
+    const comId = await GetEmpresaIdByUser(currentUserId)
     let filter = {
         skip: Number(page * pageSize),
         take: Number(pageSize),
@@ -38,7 +38,7 @@ export const get = async ({ userName, email, pageSize, page }, currentUserId) =>
             useComId: comId,
             useDeleted: FALSE,
             useComId: comId
-        }
+        }, include: { companys: true }
     }
     const orConditions = []
     if (userName) {
@@ -65,14 +65,20 @@ export const get = async ({ userName, email, pageSize, page }, currentUserId) =>
     ({
         id: item.useKey,
         userName: item.useName,
-        email: item.useEmail
+        email: item.useEmail,
+        company: item.companys.comName
 
     }))
     return result
 
 };
-export const getById = async (key, ignoreDeleted = FALSE, currentUserId) => {
-    const comId = GetEmpresaIdByUser(currentUserId)
+export const getUserById = async (id) => {
+    const user = await prisma.users.findFirst({ where: { useId: id } })
+    return user
+}
+export const getById = async (key, currentUserId) => {
+    const ignoreDeleted = FALSE
+    const comId = await GetEmpresaIdByUser(currentUserId)
 
     let result = null
     if (key) {
@@ -103,33 +109,34 @@ export const getById = async (key, ignoreDeleted = FALSE, currentUserId) => {
 
 };
 export const add = async (user, currentUserId) => {
-    const comId = GetEmpresaIdByUser(currentUserId)
+    const company = await prisma.companys.findFirst({ where: { comKey: user.company } })
     const userCreated = await prisma.users.create({
         data: {
+            useKey: uuidv4(),
             useName: user.userName,
             usePassword: user.userName,
             useEmail: user.email,
-            useComId: comId
+            useComId: company.comId
         },
     });
     const userResult = await getById(userCreated.useKey, currentUserId)
     return userResult;
 
 };
-export const update = async ({ id, name, email }, currentUserId) => {
-    const comId = GetEmpresaIdByUser(currentUserId)
+export const update = async ({ id, userName, email }, currentUserId) => {
+    const comId = await GetEmpresaIdByUser(currentUserId)
     const userUpdate = await prisma.users.updateMany({
         where: { useKey: id, useComId: comId },
         data: {
-            useName: name,
+            useName: userName,
             useEmail: email
         },
     });
-    const userResult = await getById(userUpdate.useKey)
+    const userResult = await getById(id, currentUserId)
     return userResult
 };
 export const remove = async (useKey, currentUserId) => {
-    const comId = GetEmpresaIdByUser(currentUserId)
+    const comId = await GetEmpresaIdByUser(currentUserId)
     const useentDelete = await prisma.users.updateMany({
         where: {
             useKey: useKey, useComId: comId
@@ -137,7 +144,7 @@ export const remove = async (useKey, currentUserId) => {
             useDeleted: TRUE
         }
     });
-    const userResult = await getById(useKey, TRUE, currentUserId)
+    const userResult = await getById(useKey, currentUserId)
     return userResult;
 
 };

@@ -2,8 +2,9 @@
 import { FALSE, TRUE } from "../constants.js";
 import prisma from "../lib/prisma.js";
 import { GetEmpresaIdByUser } from "../lib/utils.js";
+import { v4 as uuidv4 } from 'uuid';
 export const get = async ({ firstName, lastName, email, phone, pageSize, page }, currentUserId) => {
-  const comId = GetEmpresaIdByUser( currentUserId)
+  const comId = await GetEmpresaIdByUser(currentUserId)
   let filter = {
     skip: Number(page * pageSize),
     take: Number(pageSize),
@@ -63,12 +64,12 @@ export const get = async ({ firstName, lastName, email, phone, pageSize, page },
   return result
 
 };
-export const getById = async (key, ignoreDeleted = FALSE, currentUserId) => {
+export const getById = async (key, currentUserId) => {
 
-
+  const ignoreDeleted = FALSE
   let result = null
   if (key) {
-    const comId = GetEmpresaIdByUser(currentUserId)
+    const comId = await GetEmpresaIdByUser(currentUserId)
     let where = {}
     if (ignoreDeleted) {
       where = {
@@ -99,7 +100,7 @@ export const getById = async (key, ignoreDeleted = FALSE, currentUserId) => {
         total: item.total,
         totalDesc: item.totalDesc,
         totalWithDesc: item.totalWithDesc,
-        TotalPayment: item.TotalPayment,
+        totalPayment: item.totalPayment,
         due: item.due,
       }
     }
@@ -121,9 +122,10 @@ export const getById = async (key, ignoreDeleted = FALSE, currentUserId) => {
 export const add = async (client, currentUserId) => {
 
 
-  const comId = GetEmpresaIdByUser( currentUserId)
+  const comId = await GetEmpresaIdByUser(currentUserId)
   const Client = await prisma.clients.create({
     data: {
+      cliKey: uuidv4(),
       cliFirstName: client.firstName,
       cliLastName: client.lastName,
       cliEmail: client.email,
@@ -149,7 +151,7 @@ export const update = async ({ id, firstName, lastName, email, phone }, currentU
   return clientResult
 };
 export const remove = async (cliKey, currentUserId) => {
-  const comId = GetEmpresaIdByUser()
+  const comId = GetEmpresaIdByUser(currentUserId)
   const ClientDelete = await prisma.clients.updateMany({
     where: {
       cliKey: cliKey
@@ -157,7 +159,7 @@ export const remove = async (cliKey, currentUserId) => {
       cliDeleted: TRUE
     }
   });
-  const clientResult = await getById(cliKey, TRUE, currentUserId)
+  const clientResult = await getById(cliKey, currentUserId)
   return clientResult;
 
 };

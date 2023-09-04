@@ -5,9 +5,9 @@ import prisma from "../../lib/prisma.js";
 import pdfCreator from "../../lib/pdfCreator.js";
 
 
-export const EmployeesList = async () => {
+export const EmployeesList = async (currentUserId) => {
     try {
-        const comId = GetEmpresaIdByUser()
+        const comId = GetEmpresaIdByUser(currentUserId)
         const filter = {
             where: {
                 empComId: comId,

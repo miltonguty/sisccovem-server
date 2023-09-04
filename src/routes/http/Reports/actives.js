@@ -1,11 +1,14 @@
 import express, { json } from 'express';
 import { ActivesAssigned, ActivesList, ActivesNoAssigned } from '../../../controller/Reports/actives.js';
+import { GetCurrentUserId } from '../../../lib/utils.js';
 
 var router = express.Router();
 
 router.get('/reports/actives/assigned', async function(req, res) {
     try {
-        const result = await ActivesAssigned();
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await ActivesAssigned(currentUserId);
         res.sendFile(result.filename);
     } catch (err) {
         console.log(err)
@@ -14,7 +17,9 @@ router.get('/reports/actives/assigned', async function(req, res) {
 });
 router.get('/reports/actives/NoAssigned', async function(req, res) {
     try {
-        const result = await ActivesNoAssigned();
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await ActivesNoAssigned(currentUserId);
         res.sendFile(result.filename);
     } catch (err) {
         console.log(err)
@@ -23,7 +28,9 @@ router.get('/reports/actives/NoAssigned', async function(req, res) {
 });
 router.get('/reports/actives', async function(req, res) {
     try {
-        const result = await ActivesList();
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await ActivesList(currentUserId);
         res.sendFile(result.filename);
     } catch (err) {
         console.log(err)

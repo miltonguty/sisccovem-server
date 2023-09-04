@@ -1,10 +1,14 @@
+
+import { getUserById } from "../controller/Users.js";
 import { GetSessionById } from "../sessions.js";
 
 export function makeSerializable (o) {
   return JSON.parse(JSON.stringify(o));
 }
-export function GetEmpresaIdByUser (userId = "") {
-  return 1;
+export async function GetEmpresaIdByUser (userId = "") {
+  const user = await getUserById(userId)
+  if (user == null) throw miExcepcionUsuario;
+  return Number(user.useComId);
 }
 export function GetPurchaseId (userId = "") {
   return 1;

@@ -1,12 +1,13 @@
 /*** CONTROLLER*/
 import { FALSE, TRUE } from "../constants.js";
 import prisma from "../lib/prisma.js";
-import { GetCurrentUserId, GetEmpresaIdByUser } from "../lib/utils.js";
-
+import {  GetEmpresaIdByUser } from "../lib/utils.js";
+import { v4 as uuidv4 } from 'uuid';
 export const add = async ({ noteSalesId, mount }, currentUserId) => {
-    const comId = GetEmpresaIdByUser(currentUserId)
+    const comId = await GetEmpresaIdByUser(currentUserId)
     const payment = await prisma.payments.create({
         data: {
+            payKey: uuidv4(),
             paySalId: Number(noteSalesId),
             payMount: Number(mount),
             payComId: comId
@@ -16,7 +17,7 @@ export const add = async ({ noteSalesId, mount }, currentUserId) => {
     return pay
 }
 export const getById = async (id, currentUserId) => {
-    const comId = GetEmpresaIdByUser(currentUserId)
+    const comId = await GetEmpresaIdByUser(currentUserId)
     let payment = await prisma.payments.findFirst({ where: { payKey: id, payComId: comId } })
     payment = {
         id: payment.payId,
@@ -28,7 +29,7 @@ export const getById = async (id, currentUserId) => {
     return payment
 }
 export const getPaymentsBySalesId = async (salesId, currentUserId) => {
-    const comId = GetEmpresaIdByUser(currentUserId)
+    const comId = await GetEmpresaIdByUser(currentUserId)
     let payments = await prisma.payments.findMany({
         where: { paySalId: Number(salesId), payDeleted: FALSE, payComId: comId }
     })
@@ -45,7 +46,7 @@ export const getPaymentsBySalesId = async (salesId, currentUserId) => {
     return payments
 }
 export const remove = async (id, currentUserId) => {
-    const comId = GetEmpresaIdByUser(currentUserId)
+    const comId = await GetEmpresaIdByUser(currentUserId)
     let payment = await prisma.payments.updateMany({
         where: { payKey: id, payComId: comId }
     })

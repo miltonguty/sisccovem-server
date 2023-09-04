@@ -2,8 +2,9 @@
 import { FALSE, TRUE } from "../constants.js";
 import prisma from "../lib/prisma.js";
 import { GetEmpresaIdByUser } from "../lib/utils.js";
+import { v4 as uuidv4 } from 'uuid';
 export const get = async ({ firstName, lastName, email, phone, pageSize, page }, currentUserId) => {
-  const comId = GetEmpresaIdByUser(currentUserId)
+  const comId = await GetEmpresaIdByUser(currentUserId)
   let filter = {
     skip: Number(page * pageSize),
     take: Number(pageSize),
@@ -67,10 +68,11 @@ export const get = async ({ firstName, lastName, email, phone, pageSize, page },
   return result
 
 };
-export const getById = async (key, ignoreDeleted = FALSE, currentUserId) => {
+export const getById = async (key, currentUserId) => {
+  const ignoreDeleted = FALSE
   let result = null
   if (key) {
-    const comId = GetEmpresaIdByUser()
+    const comId = GetEmpresaIdByUser(currentUserId)
     let where = {}
     if (ignoreDeleted) {
       where = {
@@ -102,10 +104,11 @@ export const getById = async (key, ignoreDeleted = FALSE, currentUserId) => {
 };
 export const add = async ({ firstName, lastName, email, phone, salary }, currentUserId) => {
 
-  const comId = GetEmpresaIdByUser()
+  const comId = GetEmpresaIdByUser(currentUserId)
 
   const Employee = await prisma.employees.create({
     data: {
+      empKey: uuidv4(),
       empFirstName: firstName, empLastName: lastName, empEmail: email,
       empPhone: phone, empSalary: Number(salary), empComId: comId
     },
@@ -133,7 +136,7 @@ export const remove = async (empKey, currentUserId) => {
       empDeleted: TRUE
     }
   });
-  const employeeResult = await getById(empKey, TRUE)
+  const employeeResult = await getById(empKey)
   return employeeResult;
 
 };
