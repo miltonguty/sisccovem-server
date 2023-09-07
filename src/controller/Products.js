@@ -23,16 +23,17 @@ export const get = async ({ description }, currentUserId) => {
   if (orConditions.length > 0) {
     filter.where.OR = orConditions
   }
-  const products = await prisma.products.findMany(filter);
-  const result = products.map(item =>
+  const products = await prisma.productsview.findMany(filter);
+  const result = products.map(product =>
   ({
-    id: item.proKey,
-    description: item.proDescription,
-    priceSales: item.proPriceSales,
-    pricePurchase: item.proPricePurchase,
-    image: item.proImage,
-    proId: item.proproId,
-    stock: item.proStock,
+    id: product.proKey,
+    description: product.proDescription,
+    priceSales: product.proPriceSales,
+    pricePurchase: product.proPricePurchase,
+    image: product.proImage,
+    stock: product.proStock,
+    sectionKey: product.secKey,
+    section: product.secName
   }))
   return result
 
@@ -55,25 +56,26 @@ export const getById = async (key, currentUserId) => {
         proDeleted: FALSE
       }
     }
-    const Product = await prisma.products.findFirst({
+    const product = await prisma.productsview.findFirst({
       where: where
     });
     result = {
-      id: Product.proKey,
-      description: Product.proDescription,
-      priceSales: Product.proPriceSales,
-      pricePurchase: Product.proPricePurchase,
-      image: Product.proImage,
-      stock: Product.proStock,
-
+      id: product.proKey,
+      description: product.proDescription,
+      priceSales: product.proPriceSales,
+      pricePurchase: product.proPricePurchase,
+      image: product.proImage,
+      stock: product.proStock,
+      sectionKey: product.secKey,
+      section: product.secName
     }
   }
   return result;
 
 };
-export const add = async ({ description, priceSales, pricePurchase, image, supId }, currentUserId) => {
+export const add = async ({ description, priceSales, pricePurchase, image, sectionId }, currentUserId) => {
   const comId = await GetEmpresaIdByUser(currentUserId)
-
+  const section = await prisma.sections.findFirst({ where: { secKey: sectionId } })
   const Product = await prisma.products.create({
     data: {
       proKey: uuidv4(),
@@ -82,14 +84,15 @@ export const add = async ({ description, priceSales, pricePurchase, image, supId
       proPricePurchase: Number(pricePurchase),
       proImage: image,
       proComId: Number(comId),
-      proStock: 0
+      proStock: 0,
+      proSecId: section.secId
     },
   });
-  const productResult = await getById(Product.proKey)
+  const productResult = await getById(Product.proKey, currentUserId)
   return productResult;
 
 };
-export const update = async ({ id, description, priceSales, pricePurchase, image, supId, stock }, currentUserId) => {
+export const update = async ({ id, description, priceSales, pricePurchase, image, sectionId, stock }, currentUserId) => {
   const comId = await GetEmpresaIdByUser(currentUserId)
 
   const ProductUpdate = await prisma.products.updateMany({
@@ -99,10 +102,11 @@ export const update = async ({ id, description, priceSales, pricePurchase, image
       proPriceSales: Number(priceSales),
       proPricePurchase: Number(pricePurchase),
       proImage: image,
-      proStock: Number(stock)
+      proStock: Number(stock),
+      proSecId: Number(sectionId)
     },
   });
-  const productResult = await getById(ProductUpdate.proKey)
+  const productResult = await getById(ProductUpdate.proKey, currentUserId)
   return productResult
 
 };
@@ -113,7 +117,7 @@ export const remove = async (proKey, currentUserId) => {
     where: { proKey: proKey, proComId: Number(comId) },
     data: { proDeleted: TRUE }
   });
-  const productResult = await getById(proKey)
+  const productResult = await getById(proKey, currentUserId)
   return productResult;
 
 };

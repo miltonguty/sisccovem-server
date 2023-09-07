@@ -8,21 +8,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Sections {
-  secId          Int        @id @default(autoincrement())
-  secKey         String     @unique(map: "secKey_UNIQUE") @db.VarChar(36)
-  secCreatedAt   DateTime   @default(now()) @db.DateTime(0)
-  secUpdateAt    DateTime?  @db.DateTime(0)
-  secDeleted     Int        @default(0) @db.SmallInt
-  secName        String     @db.VarChar(50)
-  secDescription String     @db.VarChar(50)
-  secComId       Int
-  companys       companys   @relation(fields: [secComId], references: [comId], onDelete: NoAction, onUpdate: NoAction, map: "fk_Sections_companys1")
-  products       products[]
-
-  @@index([secComId], map: "fk_Sections_companys1_idx")
-}
-
 model actives {
   actId          Int       @id @default(autoincrement())
   actCreateAt    DateTime  @default(now()) @db.DateTime(0)
@@ -70,7 +55,6 @@ model companys {
   comPhone     String?
   comAddress   String?
   comKey       String      @unique(map: "comKey_UNIQUE") @db.VarChar(36)
-  Sections     Sections[]
   actives      actives[]
   clients      clients[]
   employees    employees[]
@@ -80,6 +64,7 @@ model companys {
   purchases    purchases[]
   rutes        rutes[]
   sales        sales[]
+  sections     sections[]
   users        users[]
 }
 
@@ -130,7 +115,7 @@ model products {
   proStock         Float     @default(0)
   proKey           String    @unique(map: "proKey_UNIQUE") @db.VarChar(36)
   proSecId         Int
-  Sections         Sections  @relation(fields: [proSecId], references: [secId], onDelete: NoAction, onUpdate: NoAction, map: "fk_products_Sections1")
+  Sections         sections  @relation(fields: [proSecId], references: [secId], onDelete: NoAction, onUpdate: NoAction, map: "fk_products_Sections1")
   companys         companys  @relation(fields: [proComId], references: [comId], onDelete: NoAction, onUpdate: NoAction, map: "fk_products_companys1")
 
   @@index([proSecId], map: "fk_products_Sections1_idx")
@@ -152,7 +137,7 @@ model providers {
   prvName      String
   prvPhone     String
   prvAddress   String
-  prvImage     String
+  prvImage     String?
   prvComId     Int
   prvKey       String      @unique(map: "prvKey_UNIQUE") @db.VarChar(36)
   companys     companys    @relation(fields: [prvComId], references: [comId], onDelete: NoAction, onUpdate: NoAction, map: "fk_providers_companys")
@@ -194,7 +179,7 @@ model purchasesdetails {
   pudPurId           Int
   pudProdPrice       Float     @default(0)
   pudLastItem        Int       @default(0) @db.SmallInt
-  pudSubTotal        Float     @default(0)
+  pudSubTotal        Float?
   pudKey             String    @unique(map: "pudKey_UNIQUE") @db.VarChar(36)
   purchases          purchases @relation(fields: [pudPurId], references: [purId], onDelete: NoAction, onUpdate: NoAction, map: "fk_purchasesdetails_purchases1")
 
@@ -272,6 +257,21 @@ model users {
   @@index([useComId], map: "fk_users_companys1_idx")
 }
 
+model sections {
+  secId          Int        @id @default(autoincrement())
+  secKey         String     @unique(map: "secKey_UNIQUE") @db.VarChar(36)
+  secCreatedAt   DateTime   @default(now()) @db.DateTime(0)
+  secUpdateAt    DateTime?  @db.DateTime(0)
+  secDeleted     Int        @default(0) @db.SmallInt
+  secName        String     @db.VarChar(50)
+  secDescription String     @db.VarChar(50)
+  secComId       Int
+  products       products[]
+  companys       companys   @relation(fields: [secComId], references: [comId], onDelete: NoAction, onUpdate: NoAction, map: "fk_Sections_companys1")
+
+  @@index([secComId], map: "fk_Sections_companys1_idx")
+}
+
 view clientsview {
   cliId        Int       @unique @default(0)
   cliCreatedAt DateTime  @default(now()) @db.DateTime(0)
@@ -284,7 +284,8 @@ view clientsview {
   cliComId     Int
   cliKey       String    @db.VarChar(36)
   cliRutId     Int?
-  deuda        Int?
+  rutName      String    @db.VarChar(50)
+  deuda        Decimal?  @db.Decimal(10, 2)
 }
 
 view salesview {
@@ -301,12 +302,55 @@ view salesview {
   salKey        String    @db.VarChar(36)
   salDescuento  Float     @default(0)
   total         Int?
-  totalDesc     Int?
-  totalWithDesc BigInt?
-  totalPayment  Int?
-  due           BigInt?
+  totalDesc     Decimal?  @db.Decimal(11, 2)
+  totalWithDesc Decimal?  @db.Decimal(10, 2)
+  totalPayment  Decimal?  @db.Decimal(10, 2)
+  due           Decimal?  @db.Decimal(10, 2)
   cliFirstName  String
   cliLastName   String
   cliKey        String    @db.VarChar(36)
   rutName       String    @db.VarChar(50)
+  hasDeuda      Int?
+}
+
+view productsview {
+  proId            Int       @unique @default(0)
+  procreatedAt     DateTime  @default(now()) @db.DateTime(0)
+  proUpdatedAt     DateTime? @db.DateTime(0)
+  proDeleted       Int       @default(0) @db.SmallInt
+  proDescription   String
+  proPriceSales    Float     @default(0)
+  proPricePurchase Float     @default(0)
+  proImage         String?
+  proComId         Int
+  proStock         Float     @default(0)
+  proKey           String    @db.VarChar(36)
+  proSecId         Int
+  secId            Int       @default(0)
+  secKey           String    @db.VarChar(36)
+  secCreatedAt     DateTime  @default(now()) @db.DateTime(0)
+  secUpdateAt      DateTime? @db.DateTime(0)
+  secDeleted       Int       @default(0) @db.SmallInt
+  secName          String    @db.VarChar(50)
+  secDescription   String    @db.VarChar(50)
+  secComId         Int
+}
+
+/// The underlying view does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+view purchasesview {
+  purId        Int       @default(0)
+  purCreatedAt DateTime  @default(now()) @db.DateTime(0)
+  purUpdatedAt DateTime? @db.DateTime(0)
+  purDeleted   Int       @default(0) @db.SmallInt
+  purDate      DateTime  @default(now()) @db.DateTime(0)
+  purTotal     Float     @default(0)
+  purComId     Int
+  purClose     Int       @default(0) @db.SmallInt
+  purUseId     Int
+  purPrvId     Int
+  purKey       String    @db.VarChar(36)
+  purNumber    String?   @db.Char(10)
+  total        Float?
+
+  @@ignore
 }

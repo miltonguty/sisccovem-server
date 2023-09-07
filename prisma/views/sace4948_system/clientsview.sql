@@ -10,9 +10,15 @@ SELECT
   `sace4948_system`.`clients`.`cliComId` AS `cliComId`,
   `sace4948_system`.`clients`.`cliKey` AS `cliKey`,
   `sace4948_system`.`clients`.`cliRutId` AS `cliRutId`,
+  `sace4948_system`.`rutes`.`rutName` AS `rutName`,
 (
     SELECT
       `GETTOTALWITHDUE`(`sace4948_system`.`clients`.`cliId`)
   ) AS `deuda`
 FROM
-  `sace4948_system`.`clients`
+  (
+    `sace4948_system`.`clients`
+    JOIN `sace4948_system`.`rutes` ON(
+      `sace4948_system`.`rutes`.`rutId` = `sace4948_system`.`clients`.`cliRutId`
+    )
+  )

@@ -1,11 +1,12 @@
 import express, { json } from 'express';
 import { GetCurrentUserId } from '../../../lib/utils.js';
+import { ProductsList } from '../../../controller/Reports/products.js';
 
 var router = express.Router();
 
-router.get('/reports/products', async function(req, res) {
+router.get('/pdf/:sessionId/products', async function(req, res) {
     try {
-        const sessionId = req.headers.authorization
+        const { sessionId } = req.params
         const currentUserId = GetCurrentUserId(sessionId)
         const result = await ProductsList(currentUserId);
         res.sendFile(result.filename);

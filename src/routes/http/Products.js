@@ -19,10 +19,10 @@ router.get('/Products', async function(req, res) {
 });
 router.post('/Products', async function(req, res) {
     try {
-        const { description, priceSales, pricePurchase, image, supId } = req.body;
+        const { description, priceSales, pricePurchase, image, sectionId } = req.body;
         const sessionId = req.headers.authorization
         const currentUserId = GetCurrentUserId(sessionId)
-        const result = await add({ description, priceSales, pricePurchase, image, supId }, currentUserId);
+        const result = await add({ description, priceSales, pricePurchase, image, sectionId }, currentUserId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)

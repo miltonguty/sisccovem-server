@@ -10,6 +10,8 @@ import sessionRoute from './session.js'
 import userRoute from './users.js'
 import activesRoute from './actives.js'
 import rutesRoute from './rutes.js'
+import sectionsRoute from './sections.js'
+
 import RptactivesRoute from './Reports/actives.js'
 import RptClientsRoute from './Reports/clients.js'
 import RptEmployeesRoute from './Reports/employees.js'
@@ -33,6 +35,7 @@ export default {
     userRoute,
     activesRoute,
     rutesRoute,
+    sectionsRoute,
     paymentsRoute,
 
     RptClientsRoute,

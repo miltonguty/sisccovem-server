@@ -17,20 +17,11 @@ SELECT
   ) AS `total`,
 (
     SELECT
-      `GETTOTALDESCUENTO`(
-        `sace4948_system`.`sales`.`salId`,
-        `sace4948_system`.`sales`.`salDescuento`
-      )
+      `GETTOTALDESCUENTO`(`sace4948_system`.`sales`.`salId`)
   ) AS `totalDesc`,
 (
     SELECT
-      `GETTOTALNOTESALES`(`sace4948_system`.`sales`.`salId`)
-  ) - (
-    SELECT
-      `GETTOTALDESCUENTO`(
-        `sace4948_system`.`sales`.`salId`,
-        `sace4948_system`.`sales`.`salDescuento`
-      )
+      `TOTALWITHDESC`(`sace4948_system`.`sales`.`salId`)
   ) AS `totalWithDesc`,
 (
     SELECT
@@ -38,21 +29,20 @@ SELECT
   ) AS `totalPayment`,
 (
     SELECT
-      `GETTOTALNOTESALES`(`sace4948_system`.`sales`.`salId`)
-  ) - (
-    SELECT
-      `GETTOTALDESCUENTO`(
-        `sace4948_system`.`sales`.`salId`,
-        `sace4948_system`.`sales`.`salDescuento`
-      )
-  ) - (
-    SELECT
-      `GETTOTALPAYMENT`(`sace4948_system`.`sales`.`salId`)
+      `GETTOTALDUEBYSALID`(`sace4948_system`.`sales`.`salId`)
   ) AS `due`,
   `sace4948_system`.`clients`.`cliFirstName` AS `cliFirstName`,
   `sace4948_system`.`clients`.`cliLastName` AS `cliLastName`,
   `sace4948_system`.`clients`.`cliKey` AS `cliKey`,
-  `sace4948_system`.`rutes`.`rutName` AS `rutName`
+  `sace4948_system`.`rutes`.`rutName` AS `rutName`,
+  IF(
+    (
+      SELECT
+        `GETTOTALDUEBYSALID`(`sace4948_system`.`sales`.`salId`) <> 0
+    ),
+    1,
+    0
+  ) AS `hasDeuda`
 FROM
   (
     (

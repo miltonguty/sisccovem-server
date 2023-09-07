@@ -12,12 +12,12 @@ router.get('/reports/Purchases', async function(req, res) {
         res.status(404).json({ error: err });
     }
 });
-router.get('/reports/purchases/NotePurchase/:purId', async function(req, res) {
+router.get('/pdf/:sessionId/purchases/NotePurchase/:purId', async function(req, res) {
     try {
-        const { purId } = req.params
-        const sessionId = req.headers.authorization
+
+        const { sessionId, purId } = req.params
         const currentUserId = GetCurrentUserId(sessionId)
-        const result = await NotePurchase(purId,currentUserId);
+        const result = await NotePurchase(purId, currentUserId);
         res.sendFile(result.filename);
     } catch (err) {
         console.log(err)

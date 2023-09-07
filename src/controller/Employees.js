@@ -113,7 +113,7 @@ export const add = async ({ firstName, lastName, email, phone, salary }, current
       empPhone: phone, empSalary: Number(salary), empComId: comId
     },
   });
-  const employeeResult = await getById(Employee.empKey)
+  const employeeResult = await getById(Employee.empKey, currentUserId)
   return employeeResult;
 
 };
@@ -126,7 +126,7 @@ export const update = async ({ id, firstName, lastName, email, phone, salary }, 
       empPhone: phone, empSalary: Number(salary)
     },
   });
-  const employeeResult = await getById(EmployeeUpdate.empKey)
+  const employeeResult = await getById(EmployeeUpdate.empKey, currentUserId)
   return employeeResult;
 
 };
@@ -136,7 +136,7 @@ export const remove = async (empKey, currentUserId) => {
       empDeleted: TRUE
     }
   });
-  const employeeResult = await getById(empKey)
+  const employeeResult = await getById(empKey, currentUserId)
   return employeeResult;
 
 };

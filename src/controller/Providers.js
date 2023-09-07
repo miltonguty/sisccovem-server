@@ -117,7 +117,7 @@ export const remove = async (prvKey, currentUserId) => {
     },
     data: { prvDeleted: TRUE }
   });
-  const providerResult = await getById(prvKey)
+  const providerResult = await getById(prvKey, currentUserId)
   return providerResult;
 
 };

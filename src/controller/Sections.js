@@ -2,6 +2,7 @@
 import { FALSE, TRUE } from "../constants.js";
 import prisma from "../lib/prisma.js";
 import { v4 as uuidv4 } from 'uuid';
+import { GetEmpresaIdByUser } from "../lib/utils.js";
 
 export const get = async ({ name, description, pageSize, page }, currentUserId) => {
   const comId = await GetEmpresaIdByUser(currentUserId)

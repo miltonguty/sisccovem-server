@@ -4,6 +4,7 @@ import {
     GetOrCreateNoteSales, GetSales, GetSalesById, RemoveDetails, saveDescount, setClient
 } from '../../controller/Sales.js';
 import { GetCurrentUserId } from '../../lib/utils.js';
+import { add } from '../../controller/payments.js';
 var router = express.Router();
 router.get('/sales', async function(req, res) {
     try {
@@ -66,9 +67,11 @@ router.post('/Sales/CurrenNote', async function(req, res) {
 });
 router.put('/Sales/CurrenNote', async function(req, res) {
     try {
+        const { amountCanceled } = req.body
         const sessionId = req.headers.authorization
         const currentUserId = GetCurrentUserId(sessionId)
-        const result = await CloseNoteSales(currentUserId)
+        const result = await CloseNoteSales(amountCanceled,currentUserId)
+
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
@@ -147,4 +150,5 @@ router.put('/Sales/saveDescount', async function(req, res) {
     }
 
 });
+
 export default router;

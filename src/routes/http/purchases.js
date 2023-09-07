@@ -1,12 +1,27 @@
 import express, { json } from 'express';
-import { add, get, getById, remove, addDetails } from '../../controller/Purchases.js';
+import { add, get, getById, remove, addDetails, removeDetailsById } from '../../controller/Purchases.js';
 import { SetFilterPurchase } from '../../lib/Filters.js';
 import { GetCurrentUserId } from '../../lib/utils.js';
 var router = express.Router();
 router.get('/Purchases', async function(req, res) {
     try {
         const filter = SetFilterPurchase(req.query)
-        const result = await get(filter);
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await get(filter, currentUserId);
+        res.status(200).json(result);
+    } catch (err) {
+        console.log(err)
+        res.status(404).json({ error: err });
+    }
+
+});
+router.delete('/Purchases/details/:pudId', async function(req, res) {
+    try {
+        const { pudId } = req.params;
+        const sessionId = req.headers.authorization
+        const currentUserId = GetCurrentUserId(sessionId)
+        const result = await removeDetailsById({ pudId }, currentUserId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)

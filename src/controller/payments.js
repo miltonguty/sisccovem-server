@@ -1,7 +1,7 @@
 /*** CONTROLLER*/
 import { FALSE, TRUE } from "../constants.js";
 import prisma from "../lib/prisma.js";
-import {  GetEmpresaIdByUser } from "../lib/utils.js";
+import { GetEmpresaIdByUser } from "../lib/utils.js";
 import { v4 as uuidv4 } from 'uuid';
 export const add = async ({ noteSalesId, mount }, currentUserId) => {
     const comId = await GetEmpresaIdByUser(currentUserId)
@@ -13,7 +13,7 @@ export const add = async ({ noteSalesId, mount }, currentUserId) => {
             payComId: comId
         }
     })
-    const pay = await getById(payment.payKey)
+    const pay = await getById(payment.payKey, currentUserId)
     return pay
 }
 export const getById = async (id, currentUserId) => {

@@ -2,7 +2,7 @@
 import { FALSE, TRUE } from "../constants.js";
 import prisma from "../lib/prisma.js";
 
-import {  GetEmpresaIdByUser } from "../lib/utils.js";
+import { GetEmpresaIdByUser } from "../lib/utils.js";
 import { GetCurrentNoteSalesByUser } from "./Sales.js";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -94,7 +94,7 @@ export const remove = async (sadKey, currentUserId) => {
     data: { sadDeleted: TRUE },
   });
   if (SalesDetaiCount.count >= 1) {
-    const SalesDetailDelete = await getById(sadKey)
+    const SalesDetailDelete = await getById(sadKey, currentUserId)
     const salesDetail = {
       id: SalesDetailDelete.id,
       prodId: SalesDetailDelete.prodId,

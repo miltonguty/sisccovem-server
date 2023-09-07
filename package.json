@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node src/app.js"
+    "start": "node src/app.js",
+    "build": "cd ../sisccovem-cl && npm install && npm run build"
   },
   "type": "module",
   "repository": {

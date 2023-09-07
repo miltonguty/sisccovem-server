@@ -5,6 +5,7 @@ import prisma from "../lib/prisma.js";
 import { GetEmpresaIdByUser, GetCurrentUserId } from "../lib/utils.js";
 import { addUpdate, remove as removeDetailbyId } from "./SalesDetails.js";
 import { v4 as uuidv4 } from 'uuid';
+import { add } from "./payments.js";
 
 export const NOTE_SALES_CLOSE = 1;
 
@@ -19,15 +20,17 @@ export const GetSales = async (currentUserId) => {
         salId: 'desc',
       }]
   })
+
   sales = sales.map(async (item) => {
     return {
       id: item.salId,
       total: (Number(item.salTotal)).toFixed(2),
       descuento: item.salDescuento,
       date: item.salDate,
-      totalWithDesc: (Number(item.salTotalWithDesc)).toFixed(2),
-      totalDesc: (Number(item.salTotalDesc)).toFixed(2),
-      TotalPayment: item.TotalPayment,
+      totalWithDesc: (Number(item.totalWithDesc)).toFixed(2),
+      totalDesc: (Number(item.totalDesc)).toFixed(2),
+      totalDesc: (Number(item.totalDesc)).toFixed(2),
+      totalPayment: item.totalPayment,
       client: {
         firstName: item.cliFirstName,
         lastName: item.cliLastName,
@@ -64,12 +67,12 @@ export const GetSalesById = async (salId, currentUserId) => {
   let salesNote = null
   if (currentSale != null) {
 
-    const client = await prisma.clients.findFirst({ where: { cliId: currentSale.salCliId }, include: { rutes: true } })
+    const client = await prisma.clientsview.findFirst({ where: { cliId: currentSale.salCliId } })
 
     const salesDetails = await prisma.salesdetails.findMany({
       where: { sadSalId: Number(salId), sadDeleted: FALSE }
-
     })
+
     salesNote = {
       id: currentSale.salId,
       date: currentSale.salDate,
@@ -83,7 +86,8 @@ export const GetSalesById = async (salId, currentUserId) => {
         firstName: client.cliFirstName,
         lastName: client.cliLastName,
         id: client.cliKey,
-        rute: client.rutes.rutName
+        rute: client.rutName,
+        deuda: client.deuda
       },
       salesdetails: []
     }
@@ -107,7 +111,7 @@ export const GetSalesById = async (salId, currentUserId) => {
   return null
 }
 export const GetCurrentNoteSalesByUser = async (currentUserId) => {
-  const comId = await GetEmpresaIdByUser(currentUserId)
+
   const currentSales = await GetCurrentSales(currentUserId)
   let noteSales = null
   if (currentSales) {
@@ -159,7 +163,7 @@ export const Get = async (req, res) =>
       total: item.salTotal,
       comId: item.salComId
     }))
-    res.status(200).json(result);
+   res.status(200).json(result);
   } catch (err)
   {
     res.status(404).json({ error: err });
@@ -182,7 +186,7 @@ export const GetById = async (req, res) =>
         total: Sale.salTotal,
         comId: Sale.salComId
       }
-      res.status(200).json(result);
+     res.status(200).json(result);
 
     } else
     {
@@ -209,8 +213,6 @@ export const CreateNoteSales = async (clikey, currentUserId) => {
         salComId: Number(comId),
         salUseId: Number(currentUserId),
         salDescuento: Number(0),
-        salTotalDesc: 0,
-        salTotalWithDesc: 0,
         salLiteral: "cero",
         salCliId: Number(client.cliId)
       },
@@ -239,25 +241,21 @@ export const RemoveDetails = async (sadKey, currentUserId) => {
 
 };
 
-export const CloseNoteSales = async (currentUserId) => {
+export const CloseNoteSales = async (amountCanceled, currentUserId) => {
   const currentSalesNote = await GetCurrentNoteSalesByUser(currentUserId)
   const comId = await GetEmpresaIdByUser(currentUserId)
   const SaleUpdate = await prisma.sales.updateMany({
     where: { salId: currentSalesNote.id, salComId: comId },
     data: { salClose: NOTE_SALES_CLOSE, salUseId: currentUserId }
   });
+  const payment = await add({ noteSalesId: currentSalesNote.id, mount: amountCanceled }, currentUserId)
   return await GetSalesById(currentSalesNote.id, currentUserId)
-
-  /*
-  const file = await createPdf('NotedeVenta', 'output', SaleUpdate)
-  res.sendFile("D:\DEV\sisccovem2\sisccovem-server\public\tmp\\output.pdf",)
-  return { note: SaleUpdate, pathFile: file };*/
-
 };
+
 export const setClient = async (clientId, currentUserId) => {
   let currentSalesNote = await GetCurrentNoteSalesByUser(currentUserId)
   const comId = await GetEmpresaIdByUser(currentUserId)
-  const client = await prisma.clients.findFirst({ where: { cliKey: clientId, cliComId: comId } })
+  const client = await prisma.clientsview.findFirst({ where: { cliKey: clientId, cliComId: comId } })
   const sales = await prisma.sales.updateMany({
     where: { salId: currentSalesNote.id, salComId: comId },
     data: {
@@ -270,7 +268,9 @@ export const setClient = async (clientId, currentUserId) => {
   return {
     id: client.cliKey,
     firstName: client.cliFirstName,
-    lastName: client.cliLastName
+    lastName: client.cliLastName,
+    rute: client.rutName,
+    deuda: client.deuda
   }
 }
 export const saveDescount = async (percentage = 0, currentUserId) => {
@@ -290,8 +290,8 @@ export const saveDescount = async (percentage = 0, currentUserId) => {
       id: currentSales.salId,
       total: (Number(currentSales.salTotal)).toFixed(2),
       descuento: currentSales.salDescuento,
-      totalWithDesc: (Number(currentSales.salTotalWithDesc)).toFixed(2),
-      totalDesc: (Number(currentSales.salTotalDesc)).toFixed(2)
+      totalWithDesc: (Number(currentSales.totalWithDesc)).toFixed(2),
+      totalDesc: (Number(currentSales.totalDesc)).toFixed(2)
 
     }
   }

@@ -94,7 +94,7 @@ export const add = async (providerId, currentUserId) => {
   let purchase = null
   if (provider.length > 0) {
     purchase = await prisma.purchases.create({
-      data: { purKey: uuidv4(), purComId: ComId, purPrvId: provider[0].prvId },
+      data: { purKey: uuidv4(), purComId: comId, purPrvId: provider[0].prvId, purUseId: currentUserId },
     });
     purchase = {
       date: purchase.purDate,
@@ -125,9 +125,21 @@ export const remove = async (purId, currentUserId) => {
     where: { purId: Number(purId), purComId: comId },
     data: { purDeleted: TRUE },
   });
-
   return PurchaseDelete
+};
+export const removeDetailsById = async ({ pudId }, currentUserId) => {
 
+  const comId = await GetEmpresaIdByUser(currentUserId)
+
+  const purchasesdetails = await prisma.purchasesdetails.update({
+    where: { pudKey: pudId },
+    data: {
+      pudDeleted: TRUE
+    },
+  });
+
+  const purchase = await getById(purchasesdetails.pudPurId, currentUserId)
+  return purchase;
 };
 export const addDetails = async ({ purchaseId, prodId, price, description, count }, currentUserId) => {
 
@@ -145,6 +157,6 @@ export const addDetails = async ({ purchaseId, prodId, price, description, count
     },
   });
 
-  const purchase = await getById(purchaseId)
+  const purchase = await getById(purchaseId, currentUserId)
   return purchase;
 };

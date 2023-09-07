@@ -3,9 +3,10 @@ import { UsersList } from '../../../controller/Reports/users.js';
 import { GetCurrentUserId } from '../../../lib/utils.js';
 var router = express.Router();
 
-router.get('/reports/users', async function(req, res) {
+router.get('/pdf/:sessionId/users', async function(req, res) {
     try {
-        const sessionId = req.headers.authorization
+
+        const { sessionId } = req.params
         const currentUserId = GetCurrentUserId(sessionId)
         const result = await UsersList(currentUserId);
         res.sendFile(result.filename);

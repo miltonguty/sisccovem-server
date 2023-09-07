@@ -4,9 +4,9 @@ import { GetCurrentUserId } from '../../../lib/utils.js';
 
 var router = express.Router();
 
-router.get('/reports/actives/assigned', async function(req, res) {
+router.get('/pdf/:sessionId/actives/assigned', async function(req, res) {
     try {
-        const sessionId = req.headers.authorization
+        const { sessionId } = req.params
         const currentUserId = GetCurrentUserId(sessionId)
         const result = await ActivesAssigned(currentUserId);
         res.sendFile(result.filename);
@@ -15,9 +15,9 @@ router.get('/reports/actives/assigned', async function(req, res) {
         res.status(404).json({ error: err });
     }
 });
-router.get('/reports/actives/NoAssigned', async function(req, res) {
+router.get('/pdf/:sessionId/actives/NoAssigned', async function(req, res) {
     try {
-        const sessionId = req.headers.authorization
+        const { sessionId } = req.params
         const currentUserId = GetCurrentUserId(sessionId)
         const result = await ActivesNoAssigned(currentUserId);
         res.sendFile(result.filename);
@@ -26,9 +26,9 @@ router.get('/reports/actives/NoAssigned', async function(req, res) {
         res.status(404).json({ error: err });
     }
 });
-router.get('/reports/actives', async function(req, res) {
+router.get('/pdf/:sessionId/actives', async function(req, res) {
     try {
-        const sessionId = req.headers.authorization
+        const { sessionId } = req.params
         const currentUserId = GetCurrentUserId(sessionId)
         const result = await ActivesList(currentUserId);
         res.sendFile(result.filename);

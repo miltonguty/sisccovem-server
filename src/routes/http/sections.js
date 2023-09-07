@@ -1,12 +1,13 @@
 import express from 'express';
-import { add, get, getById, remove, update } from '../../controller/Secctions.js';
+import { add, get, getById, remove, update } from '../../controller/Sections.js';
 import { SetFilterSections } from '../../lib/Filters.js';
 import { GetCurrentUserId } from '../../lib/utils.js';
 
 var router = express.Router();
 
-router.get('/Secctions', async function(req, res) {
+router.get('/sections', async function(req, res) {
     try {
+
         const filter = SetFilterSections(req.query)
         const sessionId = req.headers.authorization
         const currentUserId = GetCurrentUserId(sessionId)
@@ -19,7 +20,7 @@ router.get('/Secctions', async function(req, res) {
 
 });
 
-router.post('/Secctions', async function(req, res) {
+router.post('/sections', async function(req, res) {
     try {
         const { codigo, description } = req.body;
         const sessionId = req.headers.authorization
@@ -32,7 +33,7 @@ router.post('/Secctions', async function(req, res) {
     }
 
 });
-router.put('/Secctions/:id', async function(req, res) {
+router.put('/sections/:id', async function(req, res) {
     try {
 
         const { id } = req.params;
@@ -47,7 +48,7 @@ router.put('/Secctions/:id', async function(req, res) {
     }
 
 });
-router.get('/Secctions/:secId', async function(req, res) {
+router.get('/sections/:secId', async function(req, res) {
     try {
         const { secId } = req.params;
         const sessionId = req.headers.authorization
@@ -60,7 +61,7 @@ router.get('/Secctions/:secId', async function(req, res) {
     }
 
 });
-router.delete('/Secctions/:secId', async function(req, res) {
+router.delete('/sections/:secId', async function(req, res) {
     try {
         const { secId } = req.params;
         const sessionId = req.headers.authorization

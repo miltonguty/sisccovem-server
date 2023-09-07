@@ -83,13 +83,13 @@ export const getById = async (key, currentUserId) => {
         cliDeleted: FALSE
       }
     }
-    const Client = await prisma.clients.findFirst({
+    const client = await prisma.clientsview.findFirst({
       where: where,
     });
     const notes = await prisma.salesview.findMany({
       where: {
-        salCliId: Client.cliId,
-        due: { gt: 0 }
+        salCliId: client.cliId,
+        hasDeuda: 1  // !=0
       }
     })
     const notesdue = notes.map(item => {
@@ -97,21 +97,23 @@ export const getById = async (key, currentUserId) => {
         id: item.salId,
         date: item.salDate,
         salCliId: item.salCliId,
-        total: item.total,
-        totalDesc: item.totalDesc,
-        totalWithDesc: item.totalWithDesc,
-        totalPayment: item.totalPayment,
-        due: item.due,
+        total: String(item.total),
+        totalDesc: String(item.totalDesc),
+        totalWithDesc: String(item.totalWithDesc),
+        totalPayment: String(item.totalPayment),
+        due: String(item.due),
       }
     }
 
     )
     result = {
-      id: Client.cliKey,
-      firstName: Client.cliFirstName,
-      lastName: Client.cliLastName,
-      email: Client.cliEmail,
-      phone: Client.cliPhone,
+      id: client.cliKey,
+      firstName: client.cliFirstName,
+      lastName: client.cliLastName,
+      email: client.cliEmail,
+      phone: client.cliPhone,
+      rute: client.rutName,
+      deuda: client.deuda,
       notesDue: notesdue
     }
   }
@@ -147,7 +149,7 @@ export const update = async ({ id, firstName, lastName, email, phone }, currentU
       cliPhone: phone
     },
   });
-  const clientResult = await getById(ClientUpdate.CliKey)
+  const clientResult = await getById(ClientUpdate.CliKey, currentUserId)
   return clientResult
 };
 export const remove = async (cliKey, currentUserId) => {
