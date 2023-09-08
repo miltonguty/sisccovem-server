@@ -204,9 +204,6 @@ export const CreateNoteSales = async (clikey, currentUserId) => {
   })
   if (client != null) {
     const literal = "cero"
-    /*const rawSQL = `call inserSales(${ Number(ComId) },${ Number(userId) }, "${ literal }",${ Number(client.cliId) })`;
-    const result = await prisma.$executeRaw (rawSQL)*/
-
     const sales = await prisma.sales.create({
       data: {
         salKey: uuidv4(),

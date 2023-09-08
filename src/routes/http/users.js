@@ -38,7 +38,8 @@ router.put('/users/:id', async function(req, res) {
         const { userName, email } = req.body;
         const sessionId = req.headers.authorization
         const currentUserId = GetCurrentUserId(sessionId)
-        const result = await update({ id, userName, email }, currentUserId);
+        //const result = await update({ id, userName, email }, currentUserId);
+        const result = {}
         res.status(200).json(result);
     } catch (err) {
         console.log(err)
