@@ -64,25 +64,17 @@ export const get = async ({ firstName, lastName, email, phone, pageSize, page },
   return result
 
 };
-export const getById = async (key, currentUserId) => {
+export const getById = async (key, currentUserId, comId) => {
 
-  const ignoreDeleted = FALSE
   let result = null
   if (key) {
-    const comId = await GetEmpresaIdByUser(currentUserId)
     let where = {}
-    if (ignoreDeleted) {
-      where = {
-        cliKey: key,
-        cliComId: comId
-      }
-    } else {
-      where = {
-        cliKey: key,
-        cliComId: comId,
-        cliDeleted: FALSE
-      }
+    where = {
+      cliKey: key,
+      cliComId: comId,
+      cliDeleted: FALSE
     }
+
     const client = await prisma.clientsview.findFirst({
       where: where,
     });
@@ -94,9 +86,9 @@ export const getById = async (key, currentUserId) => {
     })
     const notesdue = notes.map(item => {
       return {
-        id: item.salId,
+        numberNote: item.salId,
+        id: item.salKey,
         date: item.salDate,
-        salCliId: item.salCliId,
         total: String(item.total),
         totalDesc: String(item.totalDesc),
         totalWithDesc: String(item.totalWithDesc),

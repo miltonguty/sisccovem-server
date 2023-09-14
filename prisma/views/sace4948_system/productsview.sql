@@ -23,6 +23,8 @@ FROM
   (
     `sace4948_system`.`products`
     JOIN `sace4948_system`.`sections` ON(
-      `sace4948_system`.`products`.`proSecId` = `sace4948_system`.`sections`.`secId`
+      (
+        `sace4948_system`.`products`.`proSecId` = `sace4948_system`.`sections`.`secId`
+      )
     )
   )

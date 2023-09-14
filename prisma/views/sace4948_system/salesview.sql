@@ -38,7 +38,9 @@ SELECT
   IF(
     (
       SELECT
-        `GETTOTALDUEBYSALID`(`sace4948_system`.`sales`.`salId`) <> 0
+        (
+          `GETTOTALDUEBYSALID`(`sace4948_system`.`sales`.`salId`) <> 0
+        )
     ),
     1,
     0
@@ -48,10 +50,14 @@ FROM
     (
       `sace4948_system`.`sales`
       JOIN `sace4948_system`.`clients` ON(
-        `sace4948_system`.`sales`.`salCliId` = `sace4948_system`.`clients`.`cliId`
+        (
+          `sace4948_system`.`sales`.`salCliId` = `sace4948_system`.`clients`.`cliId`
+        )
       )
     )
     JOIN `sace4948_system`.`rutes` ON(
-      `sace4948_system`.`rutes`.`rutId` = `sace4948_system`.`clients`.`cliRutId`
+      (
+        `sace4948_system`.`rutes`.`rutId` = `sace4948_system`.`clients`.`cliRutId`
+      )
     )
   )

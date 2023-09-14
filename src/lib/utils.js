@@ -7,7 +7,7 @@ export function makeSerializable (o) {
 }
 export async function GetEmpresaIdByUser (userId = "") {
   const user = await getUserById(userId)
-  if (user == null) throw miExcepcionUsuario;
+  if (user == null) throw "dsadasd"
   return Number(user.useComId);
 }
 export function GetPurchaseId (userId = "") {

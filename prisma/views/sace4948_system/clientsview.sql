@@ -19,6 +19,8 @@ FROM
   (
     `sace4948_system`.`clients`
     JOIN `sace4948_system`.`rutes` ON(
-      `sace4948_system`.`rutes`.`rutId` = `sace4948_system`.`clients`.`cliRutId`
+      (
+        `sace4948_system`.`rutes`.`rutId` = `sace4948_system`.`clients`.`cliRutId`
+      )
     )
   )

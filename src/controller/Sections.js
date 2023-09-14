@@ -63,7 +63,7 @@ export const getById = async (secKey, currentUserId) => {
         secDeleted: FALSE
       }
     }
-    const sece = await prisma.seces.findFirst({
+    const sece = await prisma.sections.findFirst({
       where: where
     });
     const result = {

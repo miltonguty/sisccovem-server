@@ -1,7 +1,7 @@
 import express from 'express';
 import { add, get, getById, remove, update } from '../../controller/Clients.js';
 import { SetFilterClients } from '../../lib/Filters.js';
-import { GetCurrentUserId } from '../../lib/utils.js';
+import { GetCurrentUserId, GetEmpresaIdByUser } from '../../lib/utils.js';
 
 var router = express.Router();
 
@@ -50,7 +50,8 @@ router.get('/clients/:cliId', async function(req, res) {
         const { cliId } = req.params;
         const sessionId = req.headers.authorization
         const currentUserId = GetCurrentUserId(sessionId)
-        const result = await getById(cliId, currentUserId);
+        const comId = await GetEmpresaIdByUser(currentUserId)
+        const result = await getById(cliId, currentUserId, comId);
         res.status(200).json(result);
     } catch (err) {
         console.log(err)

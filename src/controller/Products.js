@@ -7,7 +7,8 @@ export const get = async ({ description }, currentUserId) => {
   const comId = await GetEmpresaIdByUser(currentUserId)
   let filter = {
     where: {
-      proComId: Number(comId)
+      proComId: Number(comId),
+      proDeleted: FALSE
     }
   }
   const orConditions = []
@@ -59,15 +60,20 @@ export const getById = async (key, currentUserId) => {
     const product = await prisma.productsview.findFirst({
       where: where
     });
-    result = {
-      id: product.proKey,
-      description: product.proDescription,
-      priceSales: product.proPriceSales,
-      pricePurchase: product.proPricePurchase,
-      image: product.proImage,
-      stock: product.proStock,
-      sectionKey: product.secKey,
-      section: product.secName
+
+    if (product) {
+      result = {
+        id: product.proKey,
+        description: product.proDescription,
+        priceSales: product.proPriceSales,
+        pricePurchase: product.proPricePurchase,
+        image: product.proImage,
+        stock: product.proStock,
+        sectionKey: product.secKey,
+        section: product.secName
+      }
+    } else {
+      result = null
     }
   }
   return result;
@@ -92,9 +98,9 @@ export const add = async ({ description, priceSales, pricePurchase, image, secti
   return productResult;
 
 };
-export const update = async ({ id, description, priceSales, pricePurchase, image, sectionId, stock }, currentUserId) => {
+export const update = async ({ id, description, priceSales, pricePurchase, image, sectionId }, currentUserId) => {
   const comId = await GetEmpresaIdByUser(currentUserId)
-
+  const section = await prisma.sections.findFirst({ where: { secKey: sectionId } })
   const ProductUpdate = await prisma.products.updateMany({
     where: { proKey: id, proComId: comId },
     data: {
@@ -102,8 +108,7 @@ export const update = async ({ id, description, priceSales, pricePurchase, image
       proPriceSales: Number(priceSales),
       proPricePurchase: Number(pricePurchase),
       proImage: image,
-      proStock: Number(stock),
-      proSecId: Number(sectionId)
+      proSecId: Number(section.secId)
     },
   });
   const productResult = await getById(ProductUpdate.proKey, currentUserId)

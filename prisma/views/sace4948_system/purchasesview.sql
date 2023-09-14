@@ -19,7 +19,9 @@ SELECT
     FROM
       `sace4948_system`.`purchasesdetails`
     WHERE
-      `sace4948_system`.`purchasesdetails`.`pudPurId` = `sace4948_system`.`purchases`.`purId`
+      (
+        `sace4948_system`.`purchasesdetails`.`pudPurId` = `sace4948_system`.`purchases`.`purId`
+      )
   ) AS `total`
 FROM
   `sace4948_system`.`purchases`

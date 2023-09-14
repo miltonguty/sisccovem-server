@@ -252,6 +252,7 @@ model users {
   useEmail     String
   useComId     Int
   useKey       String    @unique(map: "useKey_UNIQUE") @db.VarChar(36)
+  useRole      String    @default("usuario") @db.VarChar(45)
   companys     companys  @relation(fields: [useComId], references: [comId], onDelete: NoAction, onUpdate: NoAction, map: "fk_users_companys1")
 
   @@index([useComId], map: "fk_users_companys1_idx")
@@ -274,7 +275,7 @@ model sections {
 
 view clientsview {
   cliId        Int       @unique @default(0)
-  cliCreatedAt DateTime  @default(now()) @db.DateTime(0)
+  cliCreatedAt DateTime  @default(dbgenerated("'0000-00-00 00:00:00'")) @db.DateTime(0)
   cliUpdatedAt DateTime? @db.DateTime(0)
   cliDeleted   Int       @default(0) @db.SmallInt
   cliFirstName String
@@ -285,15 +286,15 @@ view clientsview {
   cliKey       String    @db.VarChar(36)
   cliRutId     Int?
   rutName      String    @db.VarChar(50)
-  deuda        Decimal?  @db.Decimal(10, 2)
+  deuda        Float?
 }
 
 view salesview {
   salId         Int       @unique @default(0)
-  salCreatedAt  DateTime  @default(now()) @db.DateTime(0)
+  salCreatedAt  DateTime  @default(dbgenerated("'0000-00-00 00:00:00'")) @db.DateTime(0)
   salUpdatedAt  DateTime? @db.DateTime(0)
   salDeleted    Int       @default(0) @db.SmallInt
-  salDate       DateTime  @default(now()) @db.DateTime(0)
+  salDate       DateTime  @default(dbgenerated("'0000-00-00 00:00:00'")) @db.DateTime(0)
   salLiteral    String    @default("cero")
   salComId      Int
   salCliId      Int
@@ -301,21 +302,21 @@ view salesview {
   salUseId      Int
   salKey        String    @db.VarChar(36)
   salDescuento  Float     @default(0)
-  total         Int?
-  totalDesc     Decimal?  @db.Decimal(11, 2)
+  total         Float?
+  totalDesc     Float?
   totalWithDesc Decimal?  @db.Decimal(10, 2)
-  totalPayment  Decimal?  @db.Decimal(10, 2)
-  due           Decimal?  @db.Decimal(10, 2)
+  totalPayment  Float?
+  due           Float?
   cliFirstName  String
   cliLastName   String
   cliKey        String    @db.VarChar(36)
   rutName       String    @db.VarChar(50)
-  hasDeuda      Int?
+  hasDeuda      Int       @default(0)
 }
 
 view productsview {
   proId            Int       @unique @default(0)
-  procreatedAt     DateTime  @default(now()) @db.DateTime(0)
+  procreatedAt     DateTime  @default(dbgenerated("'0000-00-00 00:00:00'")) @db.DateTime(0)
   proUpdatedAt     DateTime? @db.DateTime(0)
   proDeleted       Int       @default(0) @db.SmallInt
   proDescription   String
@@ -328,7 +329,7 @@ view productsview {
   proSecId         Int
   secId            Int       @default(0)
   secKey           String    @db.VarChar(36)
-  secCreatedAt     DateTime  @default(now()) @db.DateTime(0)
+  secCreatedAt     DateTime  @default(dbgenerated("'0000-00-00 00:00:00'")) @db.DateTime(0)
   secUpdateAt      DateTime? @db.DateTime(0)
   secDeleted       Int       @default(0) @db.SmallInt
   secName          String    @db.VarChar(50)
@@ -339,10 +340,10 @@ view productsview {
 /// The underlying view does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
 view purchasesview {
   purId        Int       @default(0)
-  purCreatedAt DateTime  @default(now()) @db.DateTime(0)
+  purCreatedAt DateTime  @default(dbgenerated("'0000-00-00 00:00:00'")) @db.DateTime(0)
   purUpdatedAt DateTime? @db.DateTime(0)
   purDeleted   Int       @default(0) @db.SmallInt
-  purDate      DateTime  @default(now()) @db.DateTime(0)
+  purDate      DateTime  @default(dbgenerated("'0000-00-00 00:00:00'")) @db.DateTime(0)
   purTotal     Float     @default(0)
   purComId     Int
   purClose     Int       @default(0) @db.SmallInt

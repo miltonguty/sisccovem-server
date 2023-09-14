@@ -24,6 +24,7 @@ export const login = async (userName, password) => {
                 address: userResult[0].companys.comAddress,
                 id: userResult[0].companys.comKey
             },
+            role: userResult[0].useRole,
             id: userResult[0].useId
         }
     }
@@ -73,6 +74,7 @@ export const get = async ({ userName, email, pageSize, page }, currentUserId) =>
 
 };
 export const getUserById = async (id) => {
+
     const user = await prisma.users.findFirst({ where: { useId: id } })
     return user
 }
